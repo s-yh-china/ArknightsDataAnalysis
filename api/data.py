@@ -251,18 +251,40 @@ class ada_data():
         for item in sorted(osr_number_month.keys(), reverse=True):
             osr_number_month_sorted[item] = osr_number_month[item]
 
-        osr_info = {
-            'time': {
-                'start_time': str(self.account.records.order_by(OperatorSearchRecord.time).limit(1)[0].time),
-                'end_time': str(self.account.records.order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
-            },
-            'osr_number': osr_number,
-            'osr_lucky_avg': osr_lucky_avg,
-            'osr_lucky_count': osr_lucky_count,
-            'osr_six_record': osr_six_record,
-            'osr_number_month': osr_number_month_sorted
-        }
-        # print(osr_info)
+        osr_info = None
+        if (len(self.account.records) > 0):
+            osr_info = {
+                'time': {
+                    'start_time': str(self.account.records.order_by(OperatorSearchRecord.time).limit(1)[0].time),
+                    'end_time': str(self.account.records.order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
+                },
+                'osr_number': osr_number,
+                'osr_lucky_avg': osr_lucky_avg,
+                'osr_lucky_count': osr_lucky_count,
+                'osr_six_record': osr_six_record,
+                'osr_number_month': osr_number_month_sorted
+            }
+        else:
+            osr_number = {
+                'total': {
+                    'all': -1,
+                    '3': 0,
+                    '4': 0,
+                    '5': 0,
+                    '6': 0
+                }
+            }
+            osr_info = {
+                'time': {
+                    'start_time': '0',
+                    'end_time': '0'
+                },
+                'osr_number': osr_number,
+                'osr_lucky_avg': osr_lucky_avg,
+                'osr_lucky_count': osr_lucky_count,
+                'osr_six_record': osr_six_record,
+                'osr_number_month': osr_number_month_sorted
+            }
         return osr_info
         
     def get_pay_record(self):
