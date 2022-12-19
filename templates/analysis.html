@@ -20,12 +20,8 @@
           </div>
         </form>
         <button type="submit" form="accform{{ acc.token }}" class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><image xlink:href="https://gitee.com/RWoxiN/image-bed/raw/master/Image/202203031635528.jpeg" width="20" height="20"/></svg>
-          {% if acc.uid is equalto info.acc_info.uid %}
-            <font color='red'>{{ acc.nickName }}</font>
-          {% else %}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><img src="{{ url_for('static',filename='image/user.jpeg') }}" width="20" height="20"/></svg>
             <font color='black'>{{ acc.nickName }}</font>
-          {% endif %}
         </button>
       </li>
     {% endfor %}

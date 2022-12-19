@@ -23,7 +23,7 @@ class ada_data():
     url_user_info = 'https://as.hypergryph.com/u8/user/info/v1/basic'
     url_cards_record = 'http://ak.hypergryph.com/user/api/inquiry/gacha'
     url_pay_record = 'https://as.hypergryph.com/u8/pay/v1/recent'
-    not_standard_pool = ['浊酒澄心']
+    not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '新年特别十连寻访']
 
     def __init__(self, token):
         self.token = token
@@ -36,33 +36,49 @@ class ada_data():
         self.fetch_pay_record()
 
     def fetch_account_info(self):
-        payload = '''
+        bili_payload = '''
         {{
-            "appId":1,
-            "channelMasterId":1,
-            "channelToken":{{
-                "token":"{}"
-            }}
+            "token":"{}"
         }}    
         '''.format(self.token)
+        if self.fetch_account_info_by(bili_payload):
+            return True
+        ark_payload = '''
+        {{
+            "appId": 1,
+            "channelMasterId": 1,
+            "channelToken": {{
+                "token": "{}"
+            }}
+        }}
+        '''.format(self.token)
+        if self.fetch_account_info_by(ark_payload):
+            return True
+        print('ERROR: ada_data::fetch_account_info, token: {}'.format(self.token))
+        return False
+
+    def fetch_account_info_by(self, payload):
         source_from_server = self.request_http.post(self.url_user_info, payload)
         if source_from_server == 'ERROR':
-            print('ERROR: ada_data::fetch_account_info, token: {}'.format(self.token))
             self.account = None
             return False
-        user_info_source = json.loads(source_from_server).get('data')
-        uid = user_info_source.get('uid')
-        nickName = user_info_source.get('nickName')
-        account = Account.get_or_create(uid=uid, defaults={'nickname': nickName, 'token': self.token})[0]
-        if not account.token == self.token:
-            account.token = self.token
-            account.save()
-        self.account = account
-        return True
+        try:
+            user_info_source = json.loads(source_from_server).get('data')
+            uid = user_info_source.get('uid')
+            nickName = user_info_source.get('nickName')
+            channelId = user_info_source.get('channelMasterId')
+            account = Account.get_or_create(uid=uid, defaults={'nickname': nickName, 'token': self.token, 'channel': channelId})[0]
+            if not account.token == self.token:
+                account.token = self.token
+                account.save()
+            self.account = account
+            return True
+        except:
+            return False
 
     def fetch_osr(self, flag_all=False):
         def get_osr_by_page(page):
-            url_cards_record_page = '{}?page={}&token={}'.format(self.url_cards_record, page, quote(self.token, safe=""))
+            url_cards_record_page = '{}?page={}&token={}&channelId={}'.format(self.url_cards_record, page, quote(self.token, safe=""), self.account.channel)
             source_from_server = self.request_http.get(url_cards_record_page)
             if source_from_server == 'ERROR':
                 print('ERROR: ada_data::get_osr::get_osr_by_page, page: {}, token: {}'.format(page, self.token))
@@ -87,7 +103,7 @@ class ada_data():
                 ts = osr_page_data_item['ts']
                 pool = osr_page_data_item['pool']
                 chars = osr_page_data_item['chars']
-                pool_type = '常规卡池'
+                pool_type = '标准寻访'
                 if pool in self.not_standard_pool:
                     pool_type = pool
                 osr_pool = OSRPool.get_or_create(name=pool, defaults={'type': pool_type})[0]
@@ -129,15 +145,23 @@ class ada_data():
                 t_index += 1
 
     def fetch_pay_record(self):
-        payload = '''
-        {{
-            "appId":1,
-            "channelMasterId":1,
-            "channelToken":{{
-                "token":"{}"
+        payload = None
+        if self.account.channel == '1':
+            payload = '''
+            {{
+                "appId": 1,
+                "channelMasterId": 1,
+                "channelToken": {{
+                    "token": "{}"
+                }}
             }}
-        }}    
-        '''.format(self.token)
+            '''.format(self.token)
+        elif self.account.channel == '2':
+            payload = '''
+            {{
+                "token":"{}"
+            }}    
+            '''.format(self.token)
         source_from_server = self.request_http.post(self.url_pay_record, payload)
         if source_from_server == 'ERROR':
             print('ERROR: ada_data::fetch_pay_record, token: {}'.format(self.token))

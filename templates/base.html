@@ -19,7 +19,7 @@
     <div class="navbar-nav">
       <div class="nav-item text-nowrap">
         {% block cur_user %}{% endblock %}
-        <a class="nav-link px-3" href="https://github.com/RWoxiN/ArknightsDataAnalysis" style="display: inline-block;">Author: Rian Ng</a>
+        <a class="nav-link px-3" href="https://github.com/RWoxiN/ArknightsDataAnalysis" style="display: inline-block;">Author: Rian Ng, violetc</a>
       </div>
     </div>
     </header>
@@ -43,7 +43,7 @@
                     </div>
                   </form>
                   <button type="submit" form="accform{{ acc.token }}" class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><image xlink:href="https://gitee.com/RWoxiN/image-bed/raw/master/Image/202203031635528.jpeg" width="20" height="20"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><img src="{{ url_for('static',filename='image/user.jpeg') }}" width="20" height="20"/></svg>
                     <font color='black'>{{ acc.nickName }}</font>
                   </button>
                 </li>

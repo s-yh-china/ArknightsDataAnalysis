@@ -1,6 +1,6 @@
 import uuid
 from flask import Flask, redirect, request, url_for
-from flask import render_template
+from flask import render_template, send_from_directory
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 
 from api import *
@@ -85,9 +85,11 @@ def index():
         else:
             return render_template('index.html', accounts=accs_info, new_acc_info={'None': token}, user=current_user)
 
-@app.route('/api/acc/add', methods=['POST'])
+@app.route('/api/acc/add', methods=['POST', 'GET'])
 @login_required
 def add_acc():
+    if request.method == 'GET':
+        return redirect('/') 
     token = request.form.get('token')
     a_config = ada_config()
     a_api = ada_api(token)
@@ -96,23 +98,29 @@ def add_acc():
     user.add_acc(acc_info['uid'])
     return redirect('/')
 
-@app.route('/analyze/refresh', methods=['POST'])
+@app.route('/analyze/refresh', methods=['POST', 'GET'])
 @login_required
 def refresh_ada():
+    if request.method == 'GET':
+        return redirect('/') 
     token = request.form.get('token')
     a_api = ada_api(token)
     return redirect('/')
 
-@app.route('/analyze/refresh/force', methods=['POST'])
+@app.route('/analyze/refresh/force', methods=['POST', 'GET'])
 @login_required
 def refresh_force_ada():
+    if request.method == 'GET':
+        return redirect('/') 
     token = request.form.get('token')
     a_api = ada_api(token, force_refresh=True)
     return redirect('/')
 
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['POST', 'GET'])
 @login_required
 def analyze_results():
+    if request.method == 'GET':
+        return redirect('/') 
     token = request.form.get('token')
     a_config = ada_config()
 
@@ -127,6 +135,11 @@ def analyze_results():
     a_api = ada_api(token, only_read=True)
     a_info = a_api.get_all_info()
     return render_template('analysis.html', info=a_info, accounts=accs_info, user=current_user)
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8900)

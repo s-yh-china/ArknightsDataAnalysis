@@ -6,6 +6,8 @@ https://github.com/RWoxiN/ArknightsDataAnalysis
 
 更新日志：
 
+v2.3.0 增加b服支持，增加 web 图标，修复 web 图片问题
+
 v2.2.0 加入用户账号功能，用以区分个人 Arknights 账号。删除配置文件中账号配置选项，暂时取消推送功能，如需推荐可以先退回旧版本。
 
 v2.1.1 加入强制刷新数据功能，需从配置中开启，web 端中自带强制刷新按钮，用于解决卡池刚更新时官网数据中存在未知寻访的问题。
@@ -34,7 +36,7 @@ v1.0.1: 完成基础功能，支持 sqlite3 数据库以及 bark 推送。
 
 ### 手动安装
 
-1. 在需要放置脚本的目录 `git clone https://github.com/RWoxiN/ArknightsDataAnalysis.git`，无法连接 github 的话，可使用 gitee 库 `git clone https://gitee.com/RWoxiN/ArknightsDataAnalysis.git `。
+1. 在需要放置脚本的目录 `git clone https://github.com/s-yh-china/ArknightsDataAnalysis.git`，无法连接 github 的话，可使用 gitee 库 `git clone https://gitee.com/RWoxiN/ArknightsDataAnalysis.git `。
 2. 自行配置 python3 环境，并使用 pip 安装依赖库 `pip install -r requirments.txt`。
 3. 运行 `python main.py`。初次使用会生成 config.json 然后结束程序运行，待完成配置文件修改后再次运行即可正常使用。配置文件版本较旧时会根据配置进行推送警告，为了程序正常运行，请尽快修改配置文件。
 4. 在配置文件完成修改后运行 `python main.py` 即可拉取寻访记录到数据库并根据配置进行推送。
@@ -87,7 +89,7 @@ web 端尚未开发完全，目前仍需要定时运行 `main.py` 来保证数�
 
 进入官网个人中心，即 https://ak.hypergryph.com/user/home
 
-按 F12 打开控制台，进入 Network 一栏，刷新该页面。在请求中找到 token_by_cookie 一项，找到其 Response 中的 token，记录下来。
+按 F12 打开控制台，进入 Network 一栏，刷新该页面。在请求中找到 hg (b服为ak-b) 一项，找到其 Response 中的 token，记录下来。
 
 该 token 仅能查询官网能查到的相关数据。
 

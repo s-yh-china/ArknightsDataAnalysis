@@ -64,10 +64,10 @@
     {% endif %}
   {% else %}
     <h2>token 获取方式</h2>
-    <p>进入官网个人中心，即 https://ak.hypergryph.com/user/home</p>
-    <p>按 F12 打开控制台，进入 Network 一栏，刷新该页面。在请求中找到 token_by_cookie 一项，找到其 Response 中的 token，记录下来。</p>
+    <p>进入官网个人中心，即 https://ak.hypergryph.com/user/bilibili/home</p>
+    <p>按 F12 打开控制台，进入 网络 一栏，刷新该页面。在请求中找到 ak-b(官服为hg) 一项，找到其 响应 中 data 中的 content，记录下来。</p>
     <p>该 token 仅能查询官网能查到的相关数据。</p>
-    <img src="https://gitee.com/RWoxiN/image-bed/raw/master/Image/202202062220152.png" height="50%" width="50%">
+    <img src="{{ url_for('static',filename='image/token_get.jpeg') }}" height="50%" width="50%">
 
     <br><br>
     <h2>Q&A</h2>
