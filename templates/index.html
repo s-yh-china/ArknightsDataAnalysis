@@ -13,14 +13,14 @@
 
     <form class="form-inline" role="form" id="tokenform" action="/" method="post">
       <div class="form-group">
-        <input type="text" class="form-control" id="token" name="token" placeholder="请输入 token">
+        <input type="text" class="form-control" id="token" name="token" placeholder="请输入 token/所有文字">
       </div>
     </form>
     {% if new_acc_info %}
       {% if not new_acc_info.None %}
         <form class="form-inline" style="display: none" role="form" id="addform" action="/api/acc/add" method="post">
           <div class="form-group">
-            <input type="text" class="form-control" id="token" name="token" placeholder="请输入 token" value={{ new_acc_info.token }}>
+            <input type="text" class="form-control" id="token" name="token" placeholder="请输入 token/所有文字" value={{ new_acc_info.token }}>
           </div>
         </form>
       {% endif %}
@@ -66,7 +66,7 @@
     <h2>token 获取方式</h2>
     <p>登录官网个人中心，即 B服: https://ak.hypergryph.com/user/bilibili/home 官服: https://ak.hypergryph.com/user/home</p>
     <p>然后打开 B服: https://web-api.hypergryph.com/account/info/ak-b 官服: https://web-api.hypergryph.com/account/info/hg</p>
-	<p>复制 "content": 后的双引号内的文字，注意不要复制引号</p>
+	<p>复制里面的所有文字 (当然也可以只复制token)</p>
     <p>该 token 仅能查询官网能查到的相关数据。</p>
     <img src="{{ url_for('static',filename='image/token_get.jpeg') }}" height="20%" width="100%">
 

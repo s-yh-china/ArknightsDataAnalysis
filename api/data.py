@@ -6,6 +6,13 @@ from urllib.parse import quote
 
 from .model import *
 
+def is_json(myjson):
+    try:
+        json_object = json.loads(myjson)
+    except ValueError:
+        return False
+    return True
+
 class ada_data():
     class request_http():
         def get(url):
@@ -26,7 +33,14 @@ class ada_data():
     not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '新年特别十连寻访']
 
     def __init__(self, token):
-        self.token = token
+        if is_json(token):
+            try:
+                jsontoken = json.loads(token)
+                self.token = jsontoken.get('data').get('content')
+            except:
+                self.token = ''
+        else:
+            self.token = token
     
     def fetch_data(self, force_refresh=False):
         if not self.fetch_account_info():
