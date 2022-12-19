@@ -13,9 +13,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -36,6 +38,7 @@ def register():
             emsg = 'Username exists.'
     return render_template('register.html', form=form, emsg=emsg)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -55,11 +58,13 @@ def login():
                 emsg = 'Wrong username or password.'
     return render_template('login.html', form=form, emsg=emsg)
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
@@ -85,6 +90,7 @@ def index():
         else:
             return render_template('index.html', accounts=accs_info, new_acc_info={'None': token}, user=current_user)
 
+
 @app.route('/api/acc/add', methods=['POST', 'GET'])
 @login_required
 def add_acc():
@@ -98,6 +104,7 @@ def add_acc():
     user.add_acc(acc_info['uid'])
     return redirect('/')
 
+
 @app.route('/analyze/refresh', methods=['POST', 'GET'])
 @login_required
 def refresh_ada():
@@ -107,6 +114,7 @@ def refresh_ada():
     a_api = ada_api(token)
     return redirect('/')
 
+
 @app.route('/analyze/refresh/force', methods=['POST', 'GET'])
 @login_required
 def refresh_force_ada():
@@ -115,6 +123,7 @@ def refresh_force_ada():
     token = request.form.get('token')
     a_api = ada_api(token, force_refresh=True)
     return redirect('/')
+
 
 @app.route('/analyze', methods=['POST', 'GET'])
 @login_required
@@ -137,9 +146,34 @@ def analyze_results():
     return render_template('analysis.html', info=a_info, accounts=accs_info, user=current_user)
 
 
+@app.route('/analyze/pool', methods=['POST', 'GET'])
+@login_required
+def analyze_pool_results():
+    if request.method == 'GET':
+        return redirect('/')
+    token = request.form.get('token')
+    pool = request.form.get('pool')
+
+    user = User(current_user)
+    accs_token = user.get_accs_token()
+
+    accs_info = []
+    for acc_token in accs_token:
+        a_api = ada_api(acc_token, only_read=True)
+        acc_info = a_api.get_account_info()
+        accs_info.append(acc_info)
+    a_api = ada_api(token, only_read=True)
+    a_info = {
+        'acc_info': a_api.get_account_info(),
+        'osr_info': a_api.get_pool_osr_info(pool)
+    }
+    return render_template('analysis_pool.html', info=a_info, accounts=accs_info, user=current_user)
+
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8900)

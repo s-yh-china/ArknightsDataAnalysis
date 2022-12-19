@@ -209,6 +209,7 @@ class ada_data():
         osr_lucky = {}
         osr_six_record = []
         osr_five_record = []
+        osr_pool = []
         osr_number_month = {}
         records = self.account.records.order_by(OperatorSearchRecord.time)
         for record in records:
@@ -221,6 +222,8 @@ class ada_data():
                     '6': [], '5': [], '4': [], '3': [],
                     'count': {'6': 0, '5': 0, '4': 0, '3': 0}
                 }
+            if pool not in osr_pool:
+                osr_pool.insert(0, pool)
 
             month = record.time.strftime('%Y-%m')
             if month not in osr_number_month:
@@ -269,8 +272,7 @@ class ada_data():
         for item in sorted(osr_number_month.keys(), reverse=True):
             osr_number_month_sorted[item] = osr_number_month[item]
 
-        osr_info = None
-        if (len(self.account.records) > 0):
+        if (len(records) > 0):
             osr_info = {
                 'time': {
                     'start_time': str(self.account.records.order_by(OperatorSearchRecord.time).limit(1)[0].time),
@@ -281,7 +283,8 @@ class ada_data():
                 'osr_lucky_count': osr_lucky_count,
                 'osr_six_record': osr_six_record,
                 'osr_five_record': osr_five_record,
-                'osr_number_month': osr_number_month_sorted
+                'osr_number_month': osr_number_month_sorted,
+                'osr_pool': osr_pool
             }
         else:
             osr_info = {
@@ -302,10 +305,87 @@ class ada_data():
                 'osr_lucky_count': osr_lucky_count,
                 'osr_six_record': osr_six_record,
                 'osr_five_record': osr_five_record,
-                'osr_number_month': osr_number_month_sorted
+                'osr_number_month': osr_number_month_sorted,
+                'osr_pool': osr_pool
             }
         return osr_info
-        
+
+    def get_pool_osr_info(self, pool_name):
+        pool_type = '标准寻访'
+        if pool_name in self.not_standard_pool:
+            pool_type = pool_name
+        pool = OSRPool.get_or_create(name=pool_name, defaults={'type': pool_type})[0]
+
+        osr_number = {
+            'all': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0,
+            '6': 0
+        }
+        osr_lucky = {
+            '6': [], '5': [], '4': [], '3': [],
+            'count': {'6': 0, '5': 0, '4': 0, '3': 0}
+        }
+        osr_six_record = []
+        osr_five_record = []
+        osr_number_day = {}
+        records = self.account.records.filter(pool=pool).order_by(OperatorSearchRecord.time)
+
+        for record in records:
+            day = record.time.strftime('%Y-%m-%d')
+            if day not in osr_number_day:
+                osr_number_day[day] = 0
+            operators = record.operators
+            for operator in operators:
+                rarity = operator.rarity
+                osr_number['all'] += 1
+                osr_number[str(rarity)] += 1
+                osr_number_day[day] += 1
+
+                for r in range(3, 7):
+                    osr_lucky['count'][str(r)] += 1
+
+                if rarity == 6 or rarity == 5:
+                    s_record = {
+                        'time': str(record.time),
+                        'count': osr_lucky['count'][str(r)],
+                        'name': operator.name,
+                        'is_new': operator.is_new,
+                    }
+                    if rarity == 6:
+                        osr_six_record.insert(0, s_record)
+                    elif rarity == 5:
+                        osr_five_record.insert(0, s_record)
+
+                osr_lucky[str(rarity)].append(osr_lucky['count'][str(rarity)])
+                osr_lucky['count'][str(rarity)] = 0
+
+        osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
+
+        for r in range(3, 7):
+            osr_lucky_avg[str(r)].extend(osr_lucky[str(r)])
+        for r in range(3, 7):
+            if len(osr_lucky_avg[str(r)]) == 0:
+                osr_lucky_avg[str(r)] = 0
+            else:
+                osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+
+        osr_number_day_sorted = {}
+        for item in sorted(osr_number_day.keys(), reverse=True):
+            osr_number_day_sorted[item] = osr_number_day[item]
+
+        osr_info = {
+            'pool': pool_name,
+            'osr_number': osr_number,
+            'osr_lucky_avg': osr_lucky_avg,
+            'osr_number_day': osr_number_day_sorted,
+            'osr_six_record': osr_six_record,
+            'osr_five_record': osr_five_record
+        }
+
+        return osr_info
+
     def get_pay_record(self):
         pr_info = []
         total_money = 0

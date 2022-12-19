@@ -56,6 +56,10 @@ class ada_api():
         osr_info = self.a_data.get_osr_info()
         return osr_info
 
+    def get_pool_osr_info(self, pool):
+        ors_info = self.a_data.get_pool_osr_info(pool)
+        return ors_info
+
     ################################
     # 获取充值记录
     # return:
