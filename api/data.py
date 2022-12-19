@@ -208,6 +208,7 @@ class ada_data():
         }
         osr_lucky = {}
         osr_six_record = []
+        osr_five_record = []
         osr_number_month = {}
         records = self.account.records.order_by(OperatorSearchRecord.time)
         for record in records:
@@ -235,7 +236,7 @@ class ada_data():
                 for r in range(3, 7):
                     osr_lucky[pool_type]['count'][str(r)] += 1
                 
-                if rarity == 6:
+                if rarity == 6 or rarity == 5:
                     s_record = {
                         'time': str(record.time),
                         'pool': record.pool.name,
@@ -243,7 +244,10 @@ class ada_data():
                         'name': operator.name,
                         'is_new': operator.is_new,
                     }
-                    osr_six_record.insert(0, s_record)
+                    if rarity == 6:
+                        osr_six_record.insert(0, s_record)
+                    elif rarity == 5:
+                        osr_five_record.insert(0, s_record)
 
                 osr_lucky[pool_type][str(rarity)].append(osr_lucky[pool_type]['count'][str(rarity)])
                 osr_lucky[pool_type]['count'][str(rarity)] = 0
@@ -276,27 +280,28 @@ class ada_data():
                 'osr_lucky_avg': osr_lucky_avg,
                 'osr_lucky_count': osr_lucky_count,
                 'osr_six_record': osr_six_record,
+                'osr_five_record': osr_five_record,
                 'osr_number_month': osr_number_month_sorted
             }
         else:
-            osr_number = {
-                'total': {
-                    'all': -1,
-                    '3': 0,
-                    '4': 0,
-                    '5': 0,
-                    '6': 0
-                }
-            }
             osr_info = {
                 'time': {
                     'start_time': '0',
                     'end_time': '0'
                 },
-                'osr_number': osr_number,
+                'osr_number': {
+                    'total': {
+                        'all': -1,
+                        '3': 0,
+                        '4': 0,
+                        '5': 0,
+                        '6': 0
+                    }
+                },
                 'osr_lucky_avg': osr_lucky_avg,
                 'osr_lucky_count': osr_lucky_count,
                 'osr_six_record': osr_six_record,
+                'osr_five_record': osr_five_record,
                 'osr_number_month': osr_number_month_sorted
             }
         return osr_info
