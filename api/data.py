@@ -62,19 +62,16 @@ class ada_data():
         if source_from_server == 'ERROR':
             self.account = None
             return False
-        try:
-            user_info_source = json.loads(source_from_server).get('data')
-            uid = user_info_source.get('uid')
-            nickName = user_info_source.get('nickName')
-            channelId = user_info_source.get('channelMasterId')
-            account = Account.get_or_create(uid=uid, defaults={'nickname': nickName, 'token': self.token, 'channel': channelId})[0]
-            if not account.token == self.token:
-                account.token = self.token
-                account.save()
-            self.account = account
-            return True
-        except:
-            return False
+        user_info_source = json.loads(source_from_server).get('data')
+        uid = user_info_source.get('uid')
+        nickName = user_info_source.get('nickName')
+        channelId = str(user_info_source.get('channelMasterId'))
+        account = Account.get_or_create(uid=uid, defaults={'nickname': nickName, 'token': self.token, 'channel': channelId})[0]
+        if not account.token == self.token:
+            account.token = self.token
+            account.save()
+        self.account = account
+        return True
 
     def fetch_osr(self, flag_all=False):
         def get_osr_by_page(page):

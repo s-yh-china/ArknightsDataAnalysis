@@ -31,7 +31,7 @@ class Account(BaseModel):
     nickname = CharField(max_length=50)
     token = CharField(max_length=300)
     owner = ForeignKeyField(DBUser, backref='ark_accs', null=True)
-    channel = CharField(max_length=2, unique=True)
+    channel = CharField(max_length=2)
 
 class OSRPool(BaseModel):
     name = CharField(max_length=20, unique=True)
