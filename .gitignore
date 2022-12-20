@@ -131,7 +131,7 @@ dmypy.json
 # test data
 *.db
 config.json
-
+errlog.txt
 
 # Fleet
 .fleet
