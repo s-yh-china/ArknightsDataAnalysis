@@ -181,6 +181,6 @@ if __name__ == '__main__':
     port = web_config.get('port')
     host = web_config.get('host')
     if debug:
-        host = "127.0.0.1"
+        host = "0.0.0.0"
 
     app.run(debug=debug, port=port, host=host)
