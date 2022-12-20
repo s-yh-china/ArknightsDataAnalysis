@@ -289,8 +289,8 @@ class ada_data():
         else:
             osr_info = {
                 'time': {
-                    'start_time': '0',
-                    'end_time': '0'
+                    'start_time': 'N/A',
+                    'end_time': 'N/A'
                 },
                 'osr_number': {
                     'total': {

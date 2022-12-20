@@ -13,13 +13,17 @@ for dbuser in DBUser.select():
     for acc in dbuser.ark_accs:
         tokens.append(acc.token)
 
+errorlog = open('errlog.txt','a')
 
 # accounts_config = a_config.load_config_accounts()
 
 # for account_config in accounts_config:
 for token in tokens:
     # token = account_config.get('token')
-    a_api = ada_api(token, force_refresh=force_refresh_enabled)
+    try:
+        a_api = ada_api(token, force_refresh=force_refresh_enabled)
+    except:
+        errorlog.write(token + ' sync fail \n')
 
     # if push_when_changed_enabled == 1:
     #     if 'push_time' not in account_config:
@@ -28,4 +32,4 @@ for token in tokens:
     #     a_config.update_config()
     # else:
     #     a_api.push()
-
+errorlog.close()

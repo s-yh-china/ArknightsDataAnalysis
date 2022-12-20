@@ -2,7 +2,7 @@
 import os, json
 
 class ada_config():
-    version = 'v2.3.0'
+    version = 'v2.4.0'
     config = {
         "version": "{}".format(version),
         "force_refresh": {
@@ -19,6 +19,11 @@ class ada_config():
                 "password": "",
                 "database": ""
             }
+        },
+        "web": {
+            "host": "127.0.0.1",
+            "port": 8900,
+            "debug": True
         },
         "accounts": [
             {
@@ -71,6 +76,14 @@ class ada_config():
         if local_config.get('version') == 'v2.1.1':
             del local_config['accounts']
             local_config['version'] = 'v2.2.0'
+        if local_config.get('version') == 'v2.3.0':
+            web = {
+                "host": "127.0.0.1",
+                "port": 8900,
+                "debug": True
+            }
+            local_config['web'] = web
+            local_config['version'] = 'v2.4.0'
         self.config = local_config
         self.update_config()
 

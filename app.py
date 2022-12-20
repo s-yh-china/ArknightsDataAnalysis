@@ -176,4 +176,11 @@ def favicon():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8900)
+    web_config = ada_config().config.get('web')
+    debug = web_config.get('debug')
+    port = web_config.get('port')
+    host = web_config.get('host')
+    if debug:
+        host = "127.0.0.1"
+
+    app.run(debug=debug, port=port, host=host)
