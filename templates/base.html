@@ -42,10 +42,17 @@
                         <input type="text" class="form-control" id="token" name="token" value={{ acc.token }}>
                     </div>
                   </form>
+                  {% if acc.tokenAlive %}
                   <button type="submit" form="accform{{ acc.token }}" class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><img src="{{ url_for('static',filename='image/user.jpeg') }}" width="20" height="20"/></svg>
                     <font color='black'>{{ acc.nickName }}</font>
                   </button>
+                  {% else %}
+                  <button type="button" class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><img src="{{ url_for('static',filename='image/user.jpeg') }}" width="20" height="20"/></svg>
+                    <font color='red'>失效账号</font>
+                  </button>
+                  {% endif %}
                 </li>
               {% endfor %}
             </ul>

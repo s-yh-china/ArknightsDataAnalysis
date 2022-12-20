@@ -29,11 +29,17 @@ class ada_api():
     #   }
     ################################
     def get_account_info(self):
-        acc_info = {
-            'uid': self.account.uid,
-            'nickName': self.account.nickname,
-            'token': self.account.token
-        }
+        if self.account is None:
+            acc_info = {
+                'tokenAlive': False
+            }
+        else:
+            acc_info = {
+                'uid': self.account.uid,
+                'nickName': self.account.nickname,
+                'token': self.account.token,
+                'tokenAlive': True
+            }
         # print(acc_info)
         return acc_info
 
