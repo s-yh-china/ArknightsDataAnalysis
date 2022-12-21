@@ -31,10 +31,17 @@ def register():
         if user_info is None:
             if password1 == password2:
                 create_user(username, password1)
-                return redirect(url_for('login'))
+                register_user_info = get_user(username)
+                register_user = User(register_user_info)
+                login_user(register_user)
+                return redirect(url_for('index'))
             else:
                 emsg = 'Different password.'
         else:
+            user = User(user_info)
+            if user.verify_password(password1):
+                login_user(user)
+                return redirect(url_for('index'))
             emsg = 'Username exists.'
     return render_template('register.html', form=form, emsg=emsg)
 

@@ -6,13 +6,14 @@ from flask_wtf import FlaskForm
 
 from .model import DBUser, Account
 
+
 def create_user(username, password):
     DBUser.get_or_create(username=username, defaults={'password': password})
+
 
 def get_user(username):
     user = DBUser.get_or_none(DBUser.username == username)
     return user
-
 
 
 class User(UserMixin):
@@ -55,6 +56,7 @@ class User(UserMixin):
 class LoginForm(FlaskForm):
     username = StringField('用户名', validators=[DataRequired()])
     password = PasswordField('密码', validators=[DataRequired()])
+
 
 class RegisterForm(FlaskForm):
     username = StringField('用户名', validators=[DataRequired()])
