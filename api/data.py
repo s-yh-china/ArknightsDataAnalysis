@@ -48,7 +48,7 @@ def get_statistics():
 
     for pool in pools:
         osr_number[pool.name] = 0
-        osr_pool.insert(0, pool.name)
+        osr_pool.append(pool.name)
 
     for record in records:
         pool = record.pool.name
@@ -94,6 +94,84 @@ def get_statistics():
         'pay_total_money': pay_total_money,
         'osr_number_month': osr_number_month_sorted,
         'osr_pool': osr_pool,
+    }
+    return info
+
+
+def get_pool_statistics(pool_name):
+    osr_number = {
+        'all': 0,
+        '3': 0,
+        '4': 0,
+        '5': 0,
+        '6': 0
+    }
+    osr_lucky = {
+        '6': [], '5': [], '4': [], '3': [],
+        'count': {'6': 0, '5': 0, '4': 0, '3': 0}
+    }
+    osr_number_day = {}
+    osr_six_lucky = {
+        'all': 0
+    }
+
+    pool = OSRPool.get_or_create(name=pool_name, defaults={'type': '标准寻访'})[0]
+    records = OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time)
+
+    for record in records:
+        pool = record.pool.name
+        day = record.time.strftime('%Y-%m-%d')
+        if day not in osr_number_day:
+            osr_number_day[day] = 0
+
+        operators = record.operators
+        for operator in operators:
+            rarity = operator.rarity
+            name = operator.name
+            osr_number['all'] += 1
+            osr_number[str(rarity)] += 1
+            osr_number_day[day] += 1
+
+            for r in range(3, 7):
+                osr_lucky['count'][str(r)] += 1
+
+            if rarity == 6:
+                if name not in osr_six_lucky:
+                    osr_six_lucky[name] = 0
+                osr_six_lucky[name] += 1
+                osr_six_lucky['all'] += 1
+
+            osr_lucky[str(rarity)].append(osr_lucky['count'][str(rarity)])
+            osr_lucky['count'][str(rarity)] = 0
+
+    osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
+
+    for r in range(3, 7):
+        osr_lucky_avg[str(r)].extend(osr_lucky[str(r)])
+    for r in range(3, 7):
+        if len(osr_lucky_avg[str(r)]) == 0:
+            osr_lucky_avg[str(r)] = 0
+        else:
+            osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+
+    osr_number_day_sorted = {}
+    for item in sorted(osr_number_day.keys(), reverse=True):
+        osr_number_day_sorted[item] = osr_number_day[item]
+
+    osr_six_lucky_sorted = {}
+    for key, value in sorted(osr_six_lucky.items(), key=lambda x:x[1], reverse=True):
+        osr_six_lucky_sorted[key] = value
+
+    info = {
+        'time': {
+            'start_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time).limit(1)[0].time),
+            'end_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
+        },
+        'pool': pool_name,
+        'osr_number': osr_number,
+        'osr_lucky_avg': osr_lucky_avg,
+        'osr_number_day': osr_number_day_sorted,
+        'osr_six_lucky': osr_six_lucky_sorted
     }
     return info
 

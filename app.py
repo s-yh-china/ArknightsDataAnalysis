@@ -162,12 +162,23 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-@app.route('/statistics')
+@app.route('/statistics', methods=['POST', 'GET'])
 @login_required
 def statistics():
     accs_info = get_user_accs()
     statistics_info = api.data.get_statistics()
     return render_template('statistics.html', accounts=accs_info, user=current_user, info=statistics_info)
+
+
+@app.route('/statistics/pool', methods=['POST', 'GET'])
+@login_required
+def statistics_pool():
+    if request.method == 'GET':
+        return redirect('/')
+    pool = request.form.get('pool')
+    accs_info = get_user_accs()
+    statistics_info = api.data.get_pool_statistics(pool)
+    return render_template('statistics_pool.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
 def get_user_accs():
