@@ -87,7 +87,11 @@ def index():
         acc_info = a_api.get_account_info()
         accs_info.append(acc_info)
     if request.method == 'GET':
-        return render_template('index.html', accounts=accs_info, user=current_user)
+        addnew = request.args.get('addnew')
+        if addnew is not None:
+            return render_template('index.html', accounts=accs_info, add_new=addnew, user=current_user)
+        else:
+            return render_template('index.html', accounts=accs_info, user=current_user)
     else:
         token = request.form.get('token')
         a_api = ada_api(token, only_read=True)
@@ -109,7 +113,7 @@ def add_acc():
     acc_info = a_api.get_account_info()
     user = User(current_user)
     user.add_acc(acc_info['uid'])
-    return redirect('/')
+    return redirect(url_for('index', addnew=acc_info['nickName']))
 
 
 @app.route('/analyze/refresh', methods=['POST', 'GET'])
@@ -188,6 +192,6 @@ if __name__ == '__main__':
     port = web_config.get('port')
     host = web_config.get('host')
     if debug:
-        host = "0.0.0.0"
+        host = "127.0.0.1"
 
     app.run(debug=debug, port=port, host=host)

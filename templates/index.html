@@ -59,10 +59,16 @@
           </tbody>
         </table>
       </div>
+      <p>账号信息获取成功，若信息正确，请点击 Add 按钮添加账号</p>
     {% else %}
       <p>token {{ new_acc_info.None }} 无效</p>
     {% endif %}
   {% else %}
+    {% if add_new %}
+      <h2> {{ add_new }} 添加成功 </h2>
+      <p>请查看pc左侧菜单或移动端左上角菜单按钮</p>
+      <br><br>
+    {% endif %}
     <h2>如何新增账号</h2>
     <p>1. 获取 token (如何获取见下)</p>
     <p>2. 将获取的内容填入输入框中 <img src="{{ url_for('static',filename='image/token_input.jpeg') }}" height="10%" width="20%"></p>
