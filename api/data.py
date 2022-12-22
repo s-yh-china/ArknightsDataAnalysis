@@ -1,17 +1,101 @@
 # -*- coding: utf-8 -*-
 from operator import is_
 import requests, json, datetime
-
 from urllib.parse import quote
-
 from .model import *
 
-def is_json(myjson):
+
+def get_json_token(myjson):
     try:
-        json_object = json.loads(myjson)
+        json_object = json.loads(myjson).get('data').get('content')
     except ValueError:
-        return False
-    return True
+        return None
+    return json_object
+
+
+def token_format(token):
+    real_token = token
+    json_token = get_json_token(token)
+    if json_token is not None:
+        real_token = json_token
+    return real_token.replace(' ', '')
+
+
+def get_statistics():
+    pay_total_money = 0
+    pay_records = PayRecord.select()
+    for pay_record in pay_records:
+        pay_total_money += pay_record.amount / 100
+
+    osr_number = {
+        'total': {
+            'all': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0,
+            '6': 0
+       }
+    }
+    osr_lucky = {
+        '6': [], '5': [], '4': [], '3': [],
+        'count': {'6': 0, '5': 0, '4': 0, '3': 0}
+    }
+    osr_number_month = {}
+    osr_pool = []
+
+    records = OperatorSearchRecord.select().order_by(OperatorSearchRecord.time)
+
+    for record in records:
+        pool = record.pool.name
+        if pool not in osr_number:
+            osr_number[pool] = 0
+        if pool not in osr_pool:
+            osr_pool.insert(0, pool)
+
+        month = record.time.strftime('%Y-%m')
+        if month not in osr_number_month:
+            osr_number_month[month] = 0
+
+        operators = record.operators
+        for operator in operators:
+            rarity = operator.rarity
+            osr_number[pool] += 1
+            osr_number['total']['all'] += 1
+            osr_number['total'][str(rarity)] += 1
+            osr_number_month[month] += 1
+
+            for r in range(3, 7):
+                osr_lucky['count'][str(r)] += 1
+
+            osr_lucky[str(rarity)].append(osr_lucky['count'][str(rarity)])
+            osr_lucky['count'][str(rarity)] = 0
+
+    osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
+
+    for r in range(3, 7):
+        osr_lucky_avg[str(r)].extend(osr_lucky[str(r)])
+    for r in range(3, 7):
+        if len(osr_lucky_avg[str(r)]) == 0:
+            osr_lucky_avg[str(r)] = 0
+        else:
+            osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+
+    osr_number_month_sorted = {}
+    for item in sorted(osr_number_month.keys(), reverse=True):
+        osr_number_month_sorted[item] = osr_number_month[item]
+
+    info = {
+        'time': {
+            'start_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time).limit(1)[0].time),
+            'end_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
+        },
+        'osr_number': osr_number,
+        'osr_lucky_avg': osr_lucky_avg,
+        'pay_total_money': pay_total_money,
+        'osr_number_month': osr_number_month_sorted,
+        'osr_pool': osr_pool,
+    }
+    return info
 
 class ada_data():
     class request_http():
@@ -33,14 +117,7 @@ class ada_data():
     not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '新年特别十连寻访']
 
     def __init__(self, token):
-        if is_json(token):
-            try:
-                jsontoken = json.loads(token)
-                self.token = jsontoken.get('data').get('content')
-            except:
-                self.token = ''
-        else:
-            self.token = token
+        self.token = token_format(token)
     
     def fetch_data(self, force_refresh=False):
         if not self.fetch_account_info():
@@ -207,8 +284,6 @@ class ada_data():
             }
         }
         osr_lucky = {}
-        osr_six_record = []
-        osr_five_record = []
         osr_pool = []
         osr_number_month = {}
         records = self.account.records.order_by(OperatorSearchRecord.time)
@@ -238,19 +313,6 @@ class ada_data():
 
                 for r in range(3, 7):
                     osr_lucky[pool_type]['count'][str(r)] += 1
-                
-                if rarity == 6 or rarity == 5:
-                    s_record = {
-                        'time': str(record.time),
-                        'pool': record.pool.name,
-                        'count': osr_lucky[pool_type]['count'][str(r)],
-                        'name': operator.name,
-                        'is_new': operator.is_new,
-                    }
-                    if rarity == 6:
-                        osr_six_record.insert(0, s_record)
-                    elif rarity == 5:
-                        osr_five_record.insert(0, s_record)
 
                 osr_lucky[pool_type][str(rarity)].append(osr_lucky[pool_type]['count'][str(rarity)])
                 osr_lucky[pool_type]['count'][str(rarity)] = 0
@@ -281,8 +343,6 @@ class ada_data():
                 'osr_number': osr_number,
                 'osr_lucky_avg': osr_lucky_avg,
                 'osr_lucky_count': osr_lucky_count,
-                'osr_six_record': osr_six_record,
-                'osr_five_record': osr_five_record,
                 'osr_number_month': osr_number_month_sorted,
                 'osr_pool': osr_pool
             }
@@ -303,8 +363,6 @@ class ada_data():
                 },
                 'osr_lucky_avg': osr_lucky_avg,
                 'osr_lucky_count': osr_lucky_count,
-                'osr_six_record': osr_six_record,
-                'osr_five_record': osr_five_record,
                 'osr_number_month': osr_number_month_sorted,
                 'osr_pool': osr_pool
             }

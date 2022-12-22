@@ -1,35 +1,26 @@
 # -*- coding: utf-8 -*-
 
 from api import *
+import datetime
 
 a_config = ada_config()
 
 push_when_changed_enabled = a_config.load_config_push_when_changed()
 force_refresh_enabled = a_config.load_config_force_refresh()
 
+errorlog = open('errlog.txt', 'a')
+print('data sync start')
 
-tokens = []
-for dbuser in DBUser.select():
-    for acc in dbuser.ark_accs:
-        tokens.append(acc.token)
-
-errorlog = open('errlog.txt','a')
-
-# accounts_config = a_config.load_config_accounts()
-
-# for account_config in accounts_config:
-for token in tokens:
-    # token = account_config.get('token')
+for account in Account.select():
+    token = account.token
     try:
         a_api = ada_api(token, force_refresh=force_refresh_enabled)
+        a_info = a_api.get_account_info()
+        print('{}(uid:{}) sync succees'.format(a_info.get('nickName'), a_info.get('uid')))
     except:
-        errorlog.write(token + ' sync fail \n')
+        failMes = '{}(uid:{}) sync fail by token({})'.format(account.nickname, account.uid, account.token)
+        print(failMes)
+        errorlog.write(datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ') + failMes + '\n')
 
-    # if push_when_changed_enabled == 1:
-    #     if 'push_time' not in account_config:
-    #         account_config['push_time'] = -1
-    #     account_config['push_time'] = a_api.push(account_config['push_time'])
-    #     a_config.update_config()
-    # else:
-    #     a_api.push()
+print('data sync compelet')
 errorlog.close()

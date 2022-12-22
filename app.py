@@ -3,6 +3,7 @@ from flask import Flask, redirect, request, url_for
 from flask import render_template, send_from_directory
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 
+import api.data
 from api import *
 
 app = Flask(__name__)
@@ -76,16 +77,7 @@ def logout():
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    a_config = ada_config()
-    
-    user = User(current_user)
-    accs_token = user.get_accs_token()
-
-    accs_info = []
-    for acc_token in accs_token:
-        a_api = ada_api(acc_token, only_read=True)
-        acc_info = a_api.get_account_info()
-        accs_info.append(acc_info)
+    accs_info = get_user_accs()
     if request.method == 'GET':
         addnew = request.args.get('addnew')
         if addnew is not None:
@@ -108,7 +100,6 @@ def add_acc():
     if request.method == 'GET':
         return redirect('/') 
     token = request.form.get('token')
-    a_config = ada_config()
     a_api = ada_api(token)
     acc_info = a_api.get_account_info()
     user = User(current_user)
@@ -142,16 +133,8 @@ def analyze_results():
     if request.method == 'GET':
         return redirect('/') 
     token = request.form.get('token')
-    a_config = ada_config()
 
-    user = User(current_user)
-    accs_token = user.get_accs_token()
-
-    accs_info = []
-    for acc_token in accs_token:
-        a_api = ada_api(acc_token, only_read=True)
-        acc_info = a_api.get_account_info()
-        accs_info.append(acc_info)
+    accs_info = get_user_accs()
     a_api = ada_api(token, only_read=True)
     a_info = a_api.get_all_info()
     return render_template('analysis.html', info=a_info, accounts=accs_info, user=current_user)
@@ -165,14 +148,7 @@ def analyze_pool_results():
     token = request.form.get('token')
     pool = request.form.get('pool')
 
-    user = User(current_user)
-    accs_token = user.get_accs_token()
-
-    accs_info = []
-    for acc_token in accs_token:
-        a_api = ada_api(acc_token, only_read=True)
-        acc_info = a_api.get_account_info()
-        accs_info.append(acc_info)
+    accs_info = get_user_accs()
     a_api = ada_api(token, only_read=True)
     a_info = {
         'acc_info': a_api.get_account_info(),
@@ -184,6 +160,27 @@ def analyze_pool_results():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+@app.route('/statistics')
+@login_required
+def statistics():
+    accs_info = get_user_accs()
+    statistics_info = api.data.get_statistics()
+    return render_template('statistics.html', accounts=accs_info, user=current_user, info=statistics_info)
+
+
+def get_user_accs():
+    user = User(current_user)
+    accs_token = user.get_accs_token()
+
+    accs_info = []
+    for acc_token in accs_token:
+        a_api = ada_api(acc_token, only_read=True)
+        acc_info = a_api.get_account_info()
+        accs_info.append(acc_info)
+
+    return accs_info
 
 
 if __name__ == '__main__':

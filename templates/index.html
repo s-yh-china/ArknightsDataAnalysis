@@ -100,5 +100,16 @@
     <h3>5. 我添加的账号呢？</h3>
     <p>你添加的账号会在账号列表中显示，它位于pc端的左侧栏和手机端的左上角左上按钮菜单中</p>
 	
+  <br><br>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottomaccounts">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <a href="{{ url_for('statistics') }}">
+            <button type="text" class="btn btn-sm btn-outline-secondary">全站统计</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
   {% endif %}
 {% endblock %}
