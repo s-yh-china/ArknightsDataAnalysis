@@ -119,7 +119,6 @@ def get_pool_statistics(pool_name):
     records = OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time)
 
     for record in records:
-        pool = record.pool.name
         day = record.time.strftime('%Y-%m-%d')
         if day not in osr_number_day:
             osr_number_day[day] = 0
