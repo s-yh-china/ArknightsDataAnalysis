@@ -164,8 +164,8 @@ def get_pool_statistics(pool_name):
 
     info = {
         'time': {
-            'start_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time).limit(1)[0].time),
-            'end_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
+            'start_time': str(OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time).limit(1)[0].time),
+            'end_time': str(OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
         },
         'pool': pool_name,
         'osr_number': osr_number,
