@@ -44,14 +44,14 @@ def get_statistics():
     osr_pool = []
 
     records = OperatorSearchRecord.select().order_by(OperatorSearchRecord.time)
+    pools = OSRPool.select()
+
+    for pool in pools:
+        osr_number[pool.name] = 0
+        osr_pool.insert(0, pool.name)
 
     for record in records:
         pool = record.pool.name
-        if pool not in osr_number:
-            osr_number[pool] = 0
-        if pool not in osr_pool:
-            osr_pool.insert(0, pool)
-
         month = record.time.strftime('%Y-%m')
         if month not in osr_number_month:
             osr_number_month[month] = 0
