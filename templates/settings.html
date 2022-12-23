@@ -103,4 +103,14 @@
     </div>
   </div>
 
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+    <h1 class="h3">绑定QQ号: {{ settings.private_qq }}</h1>
+    <a>此账号绑定的QQ号 不会显示 仅用于通知</a>
+    <form class="form-inline" role="form" id="private_qq" action="/settings/modify" method="post">
+      <div class="form-group">
+        <input type="text" class="form-control" id="private_qq" name="private_qq" placeholder="QQ号">
+      </div>
+    </form>
+  </div>
+
 {% endblock %}

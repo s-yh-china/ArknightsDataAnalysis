@@ -18,7 +18,11 @@ for account in Account.select():
         a_info = a_api.get_account_info()
         print('{}(uid:{}) sync succees'.format(a_info.get('nickName'), a_info.get('uid')))
     except:
-        failMes = '{}(uid:{}) sync fail by token({})'.format(account.nickname, account.uid, account.token)
+        a_user = account.owner
+        qq = ''
+        if a_user is not None:
+            qq = UserSettings.get_settings(a_user).private_qq
+        failMes = '{}(uid:{},qq:{}) sync fail by token({})'.format(account.nickname, account.uid, qq, account.token)
         print(failMes)
         errorlog.write(datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ') + failMes + '\n')
 

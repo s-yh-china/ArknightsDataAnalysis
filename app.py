@@ -200,6 +200,7 @@ def user_settings_modify():
     is_lucky_rank = request.form.get('lucky_rank')
     is_display_name = request.form.get('display_name')
     is_display_full = request.form.get('display_full')
+    private_qq = request.form.get('private_qq')
     if is_statistics:
         if is_statistics == 'true':
             a_user_settings.is_statistics = True
@@ -220,6 +221,9 @@ def user_settings_modify():
             a_user_settings.is_display_full = True
         elif is_display_full == 'false':
             a_user_settings.is_display_full = False
+    elif private_qq:
+        if private_qq.isdigit() and len(private_qq) > 5:
+            a_user_settings.private_qq = private_qq
 
     a_user_settings.save()
     return redirect(url_for('user_settings'))
@@ -244,9 +248,45 @@ def get_user_settings_info():
         'is_statistics': '开启' if a_user_settings.is_statistics else '关闭',
         'is_lucky_rank': '开启' if a_user_settings.is_lucky_rank else '关闭',
         'is_display_name': '开启' if a_user_settings.is_display_name else '关闭',
-        'is_display_full': '开启' if a_user_settings.is_display_full and a_user_settings.is_display_name else '关闭'
+        'is_display_full': '开启' if a_user_settings.is_display_full and a_user_settings.is_display_name else '关闭',
+        'private_qq': f_hide_mid(a_user_settings.private_qq) if a_user_settings.private_qq is not None else ''
     }
     return settings_info
+
+
+def f_hide_mid(info, count=4, fix='*'):
+    """
+       #隐藏/脱敏 中间几位
+       info 字符串
+       count 隐藏位数
+       fix 替换符号
+    """
+    if not info:
+        return ''
+    count = int(count)
+    str_len = len(info)
+    if str_len == 1:
+        return info
+    elif str_len == 2:
+        ret_str = info[0] + '*'
+    elif count == 1:
+        mid_pos = int(str_len / 2)
+        ret_str = info[:mid_pos] + fix + info[mid_pos+1:]
+    else:
+        if str_len - 2 > count:
+            if count % 2 == 0:
+                if str_len % 2 == 0:
+                    ret_str = info[:int(str_len/2 - count/2)] + count*fix + info[int(str_len/2 + count/2):]
+                else:
+                    ret_str = info[:int((str_len+1)/2 - count/2)] + count*fix + info[int((str_len+1)/2 + count/2):]
+            else:
+                if str_len % 2 == 0:
+                    ret_str = info[:int(str_len/2 - (count-1)/2)] + count*fix + info[int(str_len/2 + (count+1)/2):]
+                else:
+                    ret_str = info[:int((str_len+1)/2 - (count+1)/2)] + count*fix + info[int((str_len+1)/2 + (count-1)/2):]
+        else:
+            ret_str = info[0] + fix * (str_len-2) + info[-1]
+    return ret_str
 
 
 if __name__ == '__main__':
