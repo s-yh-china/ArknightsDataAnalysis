@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block cur_user %}
+  <div style="display: inline">
+    <a class="nav-link px-3" style="display: inline-block;" href="/">{{ user.username }}</a>
+    <a class="nav-link px-3" style="display: inline-block;" href="{{ url_for('logout') }}">Logout</a>
+  </div>
+{% endblock %}
+
+{% block main %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">欧非榜</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2" style="margin: 0 8px;">
+        <a href="{{ url_for('index') }}">
+            <button type="text" class="btn btn-sm btn-outline-secondary">Index</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <h1>本页面需要自行设置欧非榜为开启才会被计算，且我们建议各位理智游戏，勿要抽卡上头</h1>
+
+  <h2>欧皇榜</h2>
+  <a>{{ info.time.start_time }} - {{ info.time.end_time }}</a>
+  <div class="table-responsive">
+    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+      <thead>
+        <tr>
+          <th scope="col">位次</th>
+          <th scope="col">用户名</th>
+          <th scope="col">平局六星出货次数</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in info.lucky %}
+            <tr>
+                <td>{{ player.rank }}</td>
+                <td>{{ player.nickname }}</td>
+                <td>{{ "%.2f" | format(player.number) }} 抽</td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>非酋榜</h2>
+  <a>{{ info.time.start_time }} - {{ info.time.end_time }}</a>
+  <div class="table-responsive">
+    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+      <thead>
+        <tr>
+          <th scope="col">位次</th>
+          <th scope="col">用户名</th>
+          <th scope="col">平局六星出货次数</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in info.unlucky %}
+            <tr>
+                <td>{{ player.rank }}</td>
+                <td>{{ player.nickname }}</td>
+                <td>{{ "%.2f" | format(player.number) }} 抽</td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

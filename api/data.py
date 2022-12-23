@@ -5,6 +5,41 @@ from urllib.parse import quote
 from .model import *
 
 
+def f_hide_mid(info, count=4, fix='*'):
+    """
+       #隐藏/脱敏 中间几位
+       info 字符串
+       count 隐藏位数
+       fix 替换符号
+    """
+    if not info:
+        return ''
+    count = int(count)
+    str_len = len(info)
+    if str_len == 1:
+        return info
+    elif str_len == 2:
+        ret_str = info[0] + '*'
+    elif count == 1:
+        mid_pos = int(str_len / 2)
+        ret_str = info[:mid_pos] + fix + info[mid_pos+1:]
+    else:
+        if str_len - 2 > count:
+            if count % 2 == 0:
+                if str_len % 2 == 0:
+                    ret_str = info[:int(str_len / 2 - count / 2)] + count * fix + info[int(str_len / 2 + count / 2):]
+                else:
+                    ret_str = info[:int((str_len + 1) / 2 - count / 2)] + count * fix + info[int((str_len + 1) / 2 + count / 2):]
+            else:
+                if str_len % 2 == 0:
+                    ret_str = info[:int(str_len / 2 - (count - 1) / 2)] + count * fix + info[int(str_len / 2 + (count + 1) /2):]
+                else:
+                    ret_str = info[:int((str_len + 1) / 2 - (count + 1) / 2)] + count * fix + info[int((str_len + 1) / 2 + (count - 1) / 2):]
+        else:
+            ret_str = info[0] + fix * (str_len-2) + info[-1]
+    return ret_str
+
+
 def get_json_token(myjson):
     try:
         json_object = json.loads(myjson).get('data').get('content')
@@ -19,6 +54,92 @@ def token_format(token):
     if json_token is not None:
         real_token = json_token
     return real_token.replace(' ', '')
+
+
+def get_lucky_rank():
+    osr_lucky = {}
+    enable_accounts = []
+
+    accounts = Account.select()
+    for account in accounts:
+        if account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
+            enable_accounts.append(account)
+            osr_lucky[account] = {
+                'all': [],
+                'count': 0
+            }
+
+    records = OperatorSearchRecord.select().order_by(OperatorSearchRecord.time)
+
+    for record in records:
+        if record.account not in enable_accounts:
+            continue
+        operators = record.operators
+        account = record.account
+        for operator in operators:
+            osr_lucky[account]['count'] += 1
+            if operator.rarity == 6:
+                osr_lucky[account]['all'].append(osr_lucky[account]['count'])
+                osr_lucky[account]['count'] = 0
+
+    osr_lucky_avg = {}
+    for osr_account in osr_lucky:
+        osr_user_settings = UserSettings.get_settings(osr_account.owner)
+
+        if osr_user_settings.is_display_name:
+            if osr_user_settings.is_display_full:
+                osr_account_name = osr_account.nickname
+            else:
+                osr_account_name = f_hide_mid(osr_account.nickname, count=7)
+        else:
+            osr_account_name = '已匿名{}'.format(osr_account.uid[0 : 4])
+
+        if len(osr_lucky[osr_account]['all']) == 0:
+            osr_lucky_avg[osr_account_name] = 0
+        else:
+            osr_lucky_avg[osr_account_name] = sum(osr_lucky[osr_account]['all']) / len(osr_lucky[osr_account]['all'])
+
+    osr_lucky_rank = []
+    osr_lucky_rank_index = 1
+    osr_lucky_added = []
+    for key, value in sorted(osr_lucky_avg.items(), key=lambda x:x[1], reverse=False):
+        if osr_lucky_rank_index > 10:
+            break
+        if value == 0:
+            continue
+        player = {
+            'rank': osr_lucky_rank_index,
+            'nickname': key,
+            'number': value
+        }
+        osr_lucky_rank.append(player)
+        osr_lucky_added.append(key)
+        osr_lucky_rank_index += 1
+
+    osr_unlucky_rank = []
+    osr_unlucky_rank_index = 1
+    for key, value in sorted(osr_lucky_avg.items(), key=lambda x:x[1], reverse=True):
+        if osr_unlucky_rank_index > 10:
+            break
+        if key in osr_lucky_added:
+            continue
+        player = {
+            'rank': osr_unlucky_rank_index,
+            'nickname': key,
+            'number': value
+        }
+        osr_unlucky_rank.append(player)
+        osr_unlucky_rank_index += 1
+
+    info = {
+        'time': {
+            'start_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time).limit(1)[0].time),
+            'end_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
+        },
+        'lucky': osr_lucky_rank,
+        'unlucky': osr_unlucky_rank
+    }
+    return info
 
 
 def get_statistics():
