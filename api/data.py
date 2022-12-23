@@ -25,6 +25,10 @@ def get_statistics():
     pay_total_money = 0
     pay_records = PayRecord.select()
     for pay_record in pay_records:
+        a_user = pay_record.account.owner
+        if a_user is not None:
+            if not UserSettings.get_settings(a_user).is_statistics:
+                continue
         pay_total_money += pay_record.amount / 100
 
     osr_number = {
@@ -51,6 +55,11 @@ def get_statistics():
         osr_pool.append(pool.name)
 
     for record in records:
+        a_user = record.account.owner
+        if a_user is not None:
+            if not UserSettings.get_settings(a_user).is_statistics:
+                continue
+
         pool = record.pool.name
         month = record.time.strftime('%Y-%m')
         if month not in osr_number_month:
@@ -119,6 +128,11 @@ def get_pool_statistics(pool_name):
     records = OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time)
 
     for record in records:
+        a_user = record.account.owner
+        if a_user is not None:
+            if not UserSettings.get_settings(a_user).is_statistics:
+                continue
+
         day = record.time.strftime('%Y-%m-%d')
         if day not in osr_number_day:
             osr_number_day[day] = 0

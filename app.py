@@ -181,6 +181,50 @@ def statistics_pool():
     return render_template('statistics_pool.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
+@app.route('/settings')
+@login_required
+def user_settings():
+    accs_info = get_user_accs()
+    settings_info = get_user_settings_info()
+    return render_template('settings.html', accounts=accs_info, user=current_user, settings=settings_info)
+
+
+@app.route('/settings/modify', methods=['GET', 'POST'])
+@login_required
+def user_settings_modify():
+    if request.method == 'GET':
+        return redirect(url_for('user_settings'))
+    a_user_settings = User(current_user).get_settings()
+
+    is_statistics = request.form.get('statistics')
+    is_lucky_rank = request.form.get('lucky_rank')
+    is_display_name = request.form.get('display_name')
+    is_display_full = request.form.get('display_full')
+    if is_statistics:
+        if is_statistics == 'true':
+            a_user_settings.is_statistics = True
+        elif is_statistics == 'false':
+            a_user_settings.is_statistics = False
+    elif is_lucky_rank:
+        if is_lucky_rank == 'true':
+            a_user_settings.is_lucky_rank = True
+        elif is_lucky_rank == 'false':
+            a_user_settings.is_lucky_rank = False
+    elif is_display_name:
+        if is_display_name == 'true':
+            a_user_settings.is_display_name = True
+        elif is_display_name == 'false':
+            a_user_settings.is_display_name = False
+    elif is_display_full:
+        if is_display_full == 'true':
+            a_user_settings.is_display_full = True
+        elif is_display_full == 'false':
+            a_user_settings.is_display_full = False
+
+    a_user_settings.save()
+    return redirect(url_for('user_settings'))
+
+
 def get_user_accs():
     user = User(current_user)
     accs_token = user.get_accs_token()
@@ -192,6 +236,17 @@ def get_user_accs():
         accs_info.append(acc_info)
 
     return accs_info
+
+
+def get_user_settings_info():
+    a_user_settings = User(current_user).get_settings()
+    settings_info = {
+        'is_statistics': '开启' if a_user_settings.is_statistics else '关闭',
+        'is_lucky_rank': '开启' if a_user_settings.is_lucky_rank else '关闭',
+        'is_display_name': '开启' if a_user_settings.is_display_name else '关闭',
+        'is_display_full': '开启' if a_user_settings.is_display_full and a_user_settings.is_display_name else '关闭'
+    }
+    return settings_info
 
 
 if __name__ == '__main__':

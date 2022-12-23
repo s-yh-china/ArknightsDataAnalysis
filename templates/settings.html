@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block cur_user %}
+  <div style="display: inline">
+    <a class="nav-link px-3" style="display: inline-block;" href="/">{{ user.username }}</a>
+    <a class="nav-link px-3" style="display: inline-block;" href="{{ url_for('logout') }}">Logout</a>
+  </div>
+{% endblock %}
+
+{% block main %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">用户设置</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2" style="margin: 0 8px;">
+        <a href="{{ url_for('index') }}">
+            <button type="text" class="btn btn-sm btn-outline-secondary">Index</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+    <h1 class="h3">全站统计: {{ settings.is_statistics }}</h1>
+    <a>是否将你的数据加入完全匿名的全站统计页面</a>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <form class="form-inline" style="display: none" role="form" id="statistics/on" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="statistics" name="statistics" value='true'>
+          </div>
+        </form>
+        <button type="submit" form="statistics/on" class="btn btn-sm btn-outline-secondary">开启</button>
+        <form class="form-inline" style="display: none" role="form" id="statistics/off" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="statistics" name="statistics" value='false'>
+          </div>
+        </form>
+        <button type="submit" form="statistics/off" class="btn btn-sm btn-outline-secondary">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+    <h1 class="h3">欧非榜: {{ settings.is_lucky_rank }}</h1>
+    <a>是否将你的数据加入可匿名的欧非榜</a>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <form class="form-inline" style="display: none" role="form" id="lucky_rank/on" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="lucky_rank" name="lucky_rank" value='true'>
+          </div>
+        </form>
+        <button type="submit" form="lucky_rank/on" class="btn btn-sm btn-outline-secondary">开启</button>
+        <form class="form-inline" style="display: none" role="form" id="lucky_rank/off" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="lucky_rank" name="lucky_rank" value='false'>
+          </div>
+        </form>
+        <button type="submit" form="lucky_rank/off" class="btn btn-sm btn-outline-secondary">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+    <h1 class="h3">昵称显示: {{ settings.is_display_name }}</h1>
+    <a>是否允许在各种区域显示游戏账户的不完整昵称</a>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <form class="form-inline" style="display: none" role="form" id="display_name/on" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="display_name" name="display_name" value='true'>
+          </div>
+        </form>
+        <button type="submit" form="display_name/on" class="btn btn-sm btn-outline-secondary">开启</button>
+        <form class="form-inline" style="display: none" role="form" id="display_name/off" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="display_name" name="display_name" value='false'>
+          </div>
+        </form>
+        <button type="submit" form="display_name/off" class="btn btn-sm btn-outline-secondary">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+    <h1 class="h3">完整昵称显示: {{ settings.is_display_full }}</h1>
+    <a>是否允许在各种区域显示游戏账户的完整昵称 若昵称显示为关则此项也为关</a>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <form class="form-inline" style="display: none" role="form" id="display_full/on" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="display_full" name="display_full" value='true'>
+          </div>
+        </form>
+        <button type="submit" form="display_full/on" class="btn btn-sm btn-outline-secondary">开启</button>
+        <form class="form-inline" style="display: none" role="form" id="display_full/off" action="/settings/modify" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="display_full" name="display_full" value='false'>
+          </div>
+        </form>
+        <button type="submit" form="display_full/off" class="btn btn-sm btn-outline-secondary">关闭</button>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

@@ -1,18 +1,20 @@
 from ast import Pass
 from flask_login import UserMixin
 from wtforms import StringField, PasswordField
-from wtforms.validators import DataRequired, EqualTo
+from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 
-from .model import DBUser, Account
+from .model import DBUser, Account, UserSettings
 
 
 def create_user(username, password):
-    DBUser.get_or_create(username=username, defaults={'password': password})
+    user = DBUser.get_or_create(username=username, defaults={'password': password})
+    UserSettings.get_or_create(user=user)
 
 
 def get_user(username):
     user = DBUser.get_or_none(DBUser.username == username)
+    UserSettings.get_or_create(user=user)
     return user
 
 
@@ -45,6 +47,9 @@ class User(UserMixin):
     def get_id(self):
         return self.id
     
+    def get_settings(self):
+        return self.dbuser.user_settings[0]
+
     @staticmethod
     def get(user_id):
         if not user_id:
