@@ -74,6 +74,20 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/cleardata', methods=['GET', 'POST'])
+@login_required
+def clear_data():
+    if request.method == 'GET':
+        return redirect(url_for('user_settings'))
+    user = User(current_user)
+    possword = request.form.get('password')
+    if user.verify_password(possword):
+        user.clear_data()
+        return redirect('/')
+    else:
+        return redirect(url_for('user_settings'))
+
+
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():

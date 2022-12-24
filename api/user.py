@@ -4,7 +4,7 @@ from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 
-from .model import DBUser, Account, UserSettings
+from .model import *
 
 
 def create_user(username, password):
@@ -49,7 +49,20 @@ class User(UserMixin):
         return self.id
     
     def get_settings(self):
-        return self.dbuser.user_settings[0]
+        return UserSettings.get_settings(self.dbuser)
+
+    def clear_data(self):
+        accounts = Account.select().filter(owner=self.dbuser)
+        for account in accounts:
+            PayRecord.delete().where(PayRecord.account == account).execute()
+            records = OperatorSearchRecord.select().filter(account=account)
+            for record in records:
+                OSROperator.delete().where(OSROperator.record == record).execute()
+            OperatorSearchRecord.delete().where(OperatorSearchRecord.account == account).execute()
+        Account.delete().where(Account.owner == self.dbuser).execute()
+        UserSettings.delete().where(UserSettings.user == self.dbuser).execute()
+
+        return True
 
     @staticmethod
     def get(user_id):
