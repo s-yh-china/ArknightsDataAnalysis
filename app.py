@@ -228,7 +228,9 @@ def user_settings_modify():
             a_user_settings.private_qq = private_qq
     elif nickname:
         if not has_bad_char(nickname) and 0 < len(nickname) < 20:
-            a_user_settings.nickname = nickname
+            o_nickname = UserSettings.select().filter(nickname=nickname)
+            if len(o_nickname) == 0:
+                a_user_settings.nickname = nickname
     elif is_display_nick:
         if is_display_nick == 'true':
             a_user_settings.is_display_nick = True
