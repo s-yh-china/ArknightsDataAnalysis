@@ -9,13 +9,13 @@ from .model import DBUser, Account, UserSettings
 
 def create_user(username, password):
     user = DBUser.get_or_create(username=username, defaults={'password': password})[0]
-    UserSettings.get_or_create(user=user)
+    UserSettings.get_or_create(user=user, defaults={'nickname': username})
 
 
 def get_user(username):
     user = DBUser.get_or_none(DBUser.username == username)
     if user is not None:
-        UserSettings.get_or_create(user=user)
+        UserSettings.get_or_create(user=user, defaults={'nickname': username})
     return user
 
 

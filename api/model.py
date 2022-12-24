@@ -71,10 +71,12 @@ class UserSettings(BaseModel):
     is_display_name = BooleanField(default=False)
     is_display_full = BooleanField(default=False)
     private_qq = CharField(max_length=20, null=True)
+    is_display_nick = BooleanField(default=False)
+    nickname = CharField(max_length=20, unique=True)
 
     @staticmethod
     def get_settings(user):
-        return UserSettings.get_or_create(user=user)[0]
+        return UserSettings.get_or_create(user=user, defaults={'nickname': user.username})[0]
 
 
 a_config = ada_config()

@@ -201,6 +201,8 @@ def user_settings_modify():
     is_display_name = request.form.get('display_name')
     is_display_full = request.form.get('display_full')
     private_qq = request.form.get('private_qq')
+    nickname = request.form.get('nickname')
+    is_display_nick = request.form.get('display_nick')
     if is_statistics:
         if is_statistics == 'true':
             a_user_settings.is_statistics = True
@@ -222,8 +224,16 @@ def user_settings_modify():
         elif is_display_full == 'false':
             a_user_settings.is_display_full = False
     elif private_qq:
-        if private_qq.isdigit() and len(private_qq) > 5:
+        if private_qq.isdigit() and 5 < len(private_qq) < 20:
             a_user_settings.private_qq = private_qq
+    elif nickname:
+        if not has_bad_char(nickname) and 0 < len(nickname) < 20:
+            a_user_settings.nickname = nickname
+    elif is_display_nick:
+        if is_display_nick == 'true':
+            a_user_settings.is_display_nick = True
+        elif is_display_nick == 'false':
+            a_user_settings.is_display_nick = False
 
     a_user_settings.save()
     return redirect(url_for('user_settings'))
@@ -257,9 +267,20 @@ def get_user_settings_info():
         'is_lucky_rank': '开启' if a_user_settings.is_lucky_rank else '关闭',
         'is_display_name': '开启' if a_user_settings.is_display_name else '关闭',
         'is_display_full': '开启' if a_user_settings.is_display_full and a_user_settings.is_display_name else '关闭',
-        'private_qq': api.data.f_hide_mid(a_user_settings.private_qq) if a_user_settings.private_qq is not None else ''
+        'private_qq': api.data.f_hide_mid(a_user_settings.private_qq) if a_user_settings.private_qq is not None else '',
+        'is_display_nick': '开启' if a_user_settings.is_display_nick else '关闭',
+        'nickname': a_user_settings.nickname,
     }
     return settings_info
+
+
+def has_bad_char(info):
+    bad_char = ["'", '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '-', '/', '\\', '<', '>', '''"''', '{',
+                '}', '[', ']', '.', ',', ' ']
+    for i in info:
+        if i in bad_char:
+            return True
+    return False
 
 
 if __name__ == '__main__':
