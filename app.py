@@ -271,7 +271,7 @@ def get_user_settings_info():
         'is_display_full': '开启' if a_user_settings.is_display_full and a_user_settings.is_display_name else '关闭',
         'private_qq': api.data.f_hide_mid(a_user_settings.private_qq) if a_user_settings.private_qq is not None else '',
         'is_display_nick': '开启' if a_user_settings.is_display_nick else '关闭',
-        'nickname': a_user_settings.nickname,
+        'nickname': a_user_settings.get_nickname(),
     }
     return settings_info
 

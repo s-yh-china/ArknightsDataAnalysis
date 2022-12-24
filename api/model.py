@@ -74,6 +74,12 @@ class UserSettings(BaseModel):
     is_display_nick = BooleanField(default=False)
     nickname = CharField(max_length=20, unique=True)
 
+    def get_nickname(self):
+        if self.nickname == '':
+            self.nickname = self.user.username
+            self.save()
+        return self.nickname
+
     @staticmethod
     def get_settings(user):
         return UserSettings.get_or_create(user=user, defaults={'nickname': user.username})[0]
