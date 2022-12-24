@@ -97,7 +97,7 @@ def get_lucky_rank():
         if osr_user_settings.is_display_nick:
             osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
 
-        if len(osr_lucky[osr_account]['all']) > 3:
+        if len(osr_lucky[osr_account]['all']) >= 3:
             osr_lucky_avg[osr_account_name] = sum(osr_lucky[osr_account]['all']) / len(osr_lucky[osr_account]['all'])
 
     osr_lucky_rank = []
