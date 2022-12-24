@@ -95,7 +95,7 @@ def get_lucky_rank():
             osr_account_name = '已匿名{}'.format(osr_account.uid[0 : 4])
 
         if osr_user_settings.is_display_nick:
-            osr_account_name += ' ({})'.format(osr_user_settings.nickname)
+            osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
 
         if len(osr_lucky[osr_account]['all']) > 3:
             osr_lucky_avg[osr_account_name] = sum(osr_lucky[osr_account]['all']) / len(osr_lucky[osr_account]['all'])
