@@ -43,7 +43,7 @@ def f_hide_mid(info, count=4, fix='*'):
 def get_json_token(myjson):
     try:
         json_object = json.loads(myjson).get('data').get('content')
-    except ValueError:
+    except:
         return None
     return json_object
 
@@ -199,7 +199,7 @@ def get_statistics():
     osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
 
     for r in range(3, 7):
-        if len(osr_lucky[str(r)]) == 0:
+        if osr_lucky[str(r)] == 0:
             osr_lucky_avg[str(r)] = 0
         else:
             osr_lucky_avg[str(r)] = osr_lucky['count'][str(r)] / osr_lucky[str(r)]
@@ -273,7 +273,7 @@ def get_pool_statistics(pool_name):
     osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
 
     for r in range(3, 7):
-        if len(osr_lucky[str(r)]) == 0:
+        if osr_lucky[str(r)] == 0:
             osr_lucky_avg[str(r)] = 0
         else:
             osr_lucky_avg[str(r)] = osr_lucky['count'][str(r)] / osr_lucky[str(r)]
