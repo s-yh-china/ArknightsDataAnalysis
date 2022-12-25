@@ -82,6 +82,7 @@ def get_lucky_rank():
                 osr_lucky[account]['six'] += 1
 
     osr_lucky_avg = {}
+    osr_lucky_name = {}
     for osr_account in osr_lucky:
         osr_user_settings = UserSettings.get_settings(osr_account.owner)
 
@@ -91,13 +92,15 @@ def get_lucky_rank():
             else:
                 osr_account_name = f_hide_mid(osr_account.nickname, count=7)
         else:
-            osr_account_name = '已匿名{}'.format(osr_account.uid[0: 4])
-
+            uidlen = len(osr_account.uid) - 1
+            osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uidlen - 2: uidlen]))
         if osr_user_settings.is_display_nick:
             osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
+            
+        osr_lucky_name[osr_account] = osr_account_name
 
-        if osr_lucky[osr_account]['six'] >= 3:
-            osr_lucky_avg[osr_account_name] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
+        if osr_lucky[osr_account]['six'] > 0:
+            osr_lucky_avg[osr_account] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
 
     osr_lucky_rank = []
     osr_lucky_rank_index = 1
@@ -105,9 +108,11 @@ def get_lucky_rank():
     for key, value in sorted(osr_lucky_avg.items(), key=lambda x:x[1], reverse=False):
         if osr_lucky_rank_index > 10:
             break
+        if osr_lucky[key]['six'] < 3:
+            continue
         player = {
             'rank': osr_lucky_rank_index,
-            'nickname': key,
+            'nickname': osr_lucky_name[key],
             'number': value
         }
         osr_lucky_rank.append(player)
@@ -123,7 +128,7 @@ def get_lucky_rank():
             continue
         player = {
             'rank': osr_unlucky_rank_index,
-            'nickname': key,
+            'nickname': osr_lucky_name[key],
             'number': value
         }
         osr_unlucky_rank.append(player)
