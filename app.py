@@ -1,7 +1,9 @@
 import uuid
+import os.path
 from flask import Flask, redirect, request, url_for
 from flask import render_template, send_from_directory
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
+
 
 import api.data
 from api import *
@@ -306,5 +308,9 @@ if __name__ == '__main__':
     host = web_config.get('host')
     if debug:
         host = "127.0.0.1"
+
+    if not os.path.isfile('templates/activity.html'):
+        file = open('templates/activity.html', 'w')
+        file.close()
 
     app.run(debug=debug, port=port, host=host)

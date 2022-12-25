@@ -65,7 +65,7 @@ def get_lucky_rank():
         if account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
             enable_accounts.append(account)
             osr_lucky[account] = {
-                'all': [],
+                'six': 0,
                 'count': 0
             }
 
@@ -79,8 +79,7 @@ def get_lucky_rank():
         for operator in operators:
             osr_lucky[account]['count'] += 1
             if operator.rarity == 6:
-                osr_lucky[account]['all'].append(osr_lucky[account]['count'])
-                osr_lucky[account]['count'] = 0
+                osr_lucky[account]['six'] += 1
 
     osr_lucky_avg = {}
     for osr_account in osr_lucky:
@@ -92,13 +91,13 @@ def get_lucky_rank():
             else:
                 osr_account_name = f_hide_mid(osr_account.nickname, count=7)
         else:
-            osr_account_name = '已匿名{}'.format(osr_account.uid[0 : 4])
+            osr_account_name = '已匿名{}'.format(osr_account.uid[0: 4])
 
         if osr_user_settings.is_display_nick:
             osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
 
-        if len(osr_lucky[osr_account]['all']) >= 3:
-            osr_lucky_avg[osr_account_name] = (sum(osr_lucky[osr_account]['all']) + osr_lucky[osr_account]['count']) / len(osr_lucky[osr_account]['all'])
+        if osr_lucky[osr_account]['six'] >= 3:
+            osr_lucky_avg[osr_account_name] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
 
     osr_lucky_rank = []
     osr_lucky_rank_index = 1
@@ -106,8 +105,6 @@ def get_lucky_rank():
     for key, value in sorted(osr_lucky_avg.items(), key=lambda x:x[1], reverse=False):
         if osr_lucky_rank_index > 10:
             break
-        if value == 0:
-            continue
         player = {
             'rank': osr_lucky_rank_index,
             'nickname': key,
@@ -163,7 +160,7 @@ def get_statistics():
        }
     }
     osr_lucky = {
-        '6': [], '5': [], '4': [], '3': [],
+        '6': 0, '5': 0, '4': 0, '3': 0,
         'count': {'6': 0, '5': 0, '4': 0, '3': 0}
     }
     osr_number_month = {}
@@ -197,19 +194,15 @@ def get_statistics():
 
             for r in range(3, 7):
                 osr_lucky['count'][str(r)] += 1
-
-            osr_lucky[str(rarity)].append(osr_lucky['count'][str(rarity)])
-            osr_lucky['count'][str(rarity)] = 0
+            osr_lucky[str(rarity)] += 1
 
     osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
 
     for r in range(3, 7):
-        osr_lucky_avg[str(r)].extend(osr_lucky[str(r)])
-    for r in range(3, 7):
-        if len(osr_lucky_avg[str(r)]) == 0:
+        if len(osr_lucky[str(r)]) == 0:
             osr_lucky_avg[str(r)] = 0
         else:
-            osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+            osr_lucky_avg[str(r)] = osr_lucky['count'][str(r)] / osr_lucky[str(r)]
 
     osr_number_month_sorted = {}
     for item in sorted(osr_number_month.keys(), reverse=True):
@@ -238,7 +231,7 @@ def get_pool_statistics(pool_name):
         '6': 0
     }
     osr_lucky = {
-        '6': [], '5': [], '4': [], '3': [],
+        '6': 0, '5': 0, '4': 0, '3': 0,
         'count': {'6': 0, '5': 0, '4': 0, '3': 0}
     }
     osr_number_day = {}
@@ -269,6 +262,7 @@ def get_pool_statistics(pool_name):
 
             for r in range(3, 7):
                 osr_lucky['count'][str(r)] += 1
+            osr_lucky[str(rarity)] += 1
 
             if rarity == 6:
                 if name not in osr_six_lucky:
@@ -276,18 +270,13 @@ def get_pool_statistics(pool_name):
                 osr_six_lucky[name] += 1
                 osr_six_lucky['all'] += 1
 
-            osr_lucky[str(rarity)].append(osr_lucky['count'][str(rarity)])
-            osr_lucky['count'][str(rarity)] = 0
-
     osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
 
     for r in range(3, 7):
-        osr_lucky_avg[str(r)].extend(osr_lucky[str(r)])
-    for r in range(3, 7):
-        if len(osr_lucky_avg[str(r)]) == 0:
+        if len(osr_lucky[str(r)]) == 0:
             osr_lucky_avg[str(r)] = 0
         else:
-            osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+            osr_lucky_avg[str(r)] = osr_lucky['count'][str(r)] / osr_lucky[str(r)]
 
     osr_number_day_sorted = {}
     for item in sorted(osr_number_day.keys(), reverse=True):
@@ -442,7 +431,7 @@ class ada_data():
                 name = chars_item[0]
                 rarity = chars_item[1] + 1
                 is_new = bool(chars_item[2])
-                osr_operator = OSROperator.create(name=name, rarity=rarity, is_new=is_new, index=t_index, record=osr)
+                OSROperator.create(name=name, rarity=rarity, is_new=is_new, index=t_index, record=osr)
                 t_index += 1
 
     def fetch_pay_record(self):
@@ -536,12 +525,13 @@ class ada_data():
         for osr_lucky_pool in osr_lucky:
             for r in range(3, 7):
                 osr_lucky_avg[str(r)].extend(osr_lucky[osr_lucky_pool][str(r)])
+                osr_lucky_avg[str(r)].append(osr_lucky[osr_lucky_pool]['count'][str(r)])
             osr_lucky_count[osr_lucky_pool] = osr_lucky[osr_lucky_pool]['count']
         for r in range(3, 7):
-            if len(osr_lucky_avg[str(r)]) == 0:
+            if (len(osr_lucky_avg[str(r)]) - 1) <= 0:
                 osr_lucky_avg[str(r)] = 0
             else:
-                osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+                osr_lucky_avg[str(r)] = (sum(osr_lucky_avg[str(r)])) / (len(osr_lucky_avg[str(r)]) - 1)
 
         osr_number_month_sorted = {}
         for item in sorted(osr_number_month.keys(), reverse=True):
@@ -640,7 +630,7 @@ class ada_data():
             if len(osr_lucky_avg[str(r)]) == 0:
                 osr_lucky_avg[str(r)] = 0
             else:
-                osr_lucky_avg[str(r)] = sum(osr_lucky_avg[str(r)]) / len(osr_lucky_avg[str(r)])
+                osr_lucky_avg[str(r)] = (sum(osr_lucky_avg[str(r)]) + osr_lucky['count'][str(r)]) / len(osr_lucky_avg[str(r)])
 
         osr_number_day_sorted = {}
         for item in sorted(osr_number_day.keys(), reverse=True):

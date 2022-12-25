@@ -1,16 +1,12 @@
 {% extends "base.html" %}
 
 {% block cur_user %}
-  <div style="display: inline">
-    <a class="nav-link px-3" style="display: inline-block;" href="{{ url_for('user_settings') }}">{{ user.username }}</a>
-    <a class="nav-link px-3" style="display: inline-block;" href="{{ url_for('logout') }}">Logout</a>
-  </div>
+    {% include "cur_user.html" %}
 {% endblock %}
 
 {% block main %}
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">新增账号</h1>
-
     <form class="form-inline" role="form" id="tokenform" action="/" method="post">
       <div class="form-group">
         <input type="text" class="form-control" id="token" name="token" placeholder="请输入 token/所有文字">
@@ -69,14 +65,17 @@
       <p>请查看pc左侧菜单或移动端左上角菜单按钮</p>
       <br><br>
     {% endif %}
+
+    {% include "activity.html" %}
+
     <h2>如何新增账号</h2>
     <p>1. 获取 token (如何获取见下)</p>
     <p>2. 将获取的内容填入输入框中 <img src="{{ url_for('static',filename='image/token_input.jpeg') }}" height="10%" width="20%"></p>
     <p>3. 点击 Refresh 按钮 <img src="{{ url_for('static',filename='image/refresh_button.jpeg') }}" height="5%" width="10%"></p>
     <p>4. 正确显示你的账号信息后，点击 Add 按钮 <img src="{{ url_for('static',filename='image/add_button.jpeg') }}" height="3%" width="8%"></p>
     <p>5. 观察你的账号列表是否新增 (位于pc端左侧列表或手机端左上按钮菜单)</p>
-
     <br><br>
+
     <h2>token 获取方式</h2>
     <p>我们建议在浏览器隐私模式下进行这些操作</p>
     <p>登录官网个人中心，即 B服: https://ak.hypergryph.com/user/bilibili/home 官服: https://ak.hypergryph.com/user/home</p>
@@ -84,8 +83,8 @@
 	<p>复制里面的所有文字 (当然也可以只复制token)</p>
     <p>该 token 仅能查询官网能查到的相关数据。</p>
     <img src="{{ url_for('static',filename='image/token_get.jpeg') }}" height="10%" width="100%">
-
     <br><br>
+
     <h2>Q&A</h2>
     <h3>1. 卡池出现未知寻访怎么办？</h3>
     <p>这种情况主要是因为官网那边显示的是未知寻访，待官网数据修正后点击 Force Refresh 来强制刷新数据。Refresh 是不会对已经存入数据库的数据进行更改的，所以必须使用 Force Refresh 来强制刷新。</p>
@@ -99,8 +98,8 @@
     <p>如果你不想让这种情况发生，你可以在浏览器的隐私模式下登录官网的个人中心并获取token，这样获取的token会被计算为一个独立的设备，一般不会失效。</p>
     <h3>5. 我添加的账号呢？</h3>
     <p>你添加的账号会在账号列表中显示，它位于pc端的左侧栏和手机端的左上角左上按钮菜单中</p>
-	
-    <br><br>
+	<br><br>
+
     <h2>更多功能菜单</h2>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottomaccounts">
         <div class="btn-toolbar mb-2 mb-md-0">
@@ -121,6 +120,5 @@
         </div>
         </div>
     </div>
-
   {% endif %}
 {% endblock %}

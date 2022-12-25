@@ -132,6 +132,7 @@ dmypy.json
 *.db
 config.json
 errlog.txt
+templates/activity.html
 
 # Fleet
 .fleet
