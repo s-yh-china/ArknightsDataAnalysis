@@ -172,19 +172,20 @@ def get_statistics():
     osr_pool = []
 
     records = OperatorSearchRecord.select().order_by(OperatorSearchRecord.time)
-    pools = OSRPool.select()
-
-    for pool in pools:
-        osr_number[pool.name] = 0
-        osr_pool.append(pool.name)
 
     for record in records:
         a_user = record.account.owner
         if a_user is not None:
             if not UserSettings.get_settings(a_user).is_statistics:
                 continue
+        else:
+            continue
 
         pool = record.pool.name
+        if pool not in osr_pool:
+            osr_number[pool] = 0
+            osr_pool.append(pool)
+        
         month = record.time.strftime('%Y-%m')
         if month not in osr_number_month:
             osr_number_month[month] = 0
@@ -321,7 +322,7 @@ class ada_data():
     url_user_info = 'https://as.hypergryph.com/u8/user/info/v1/basic'
     url_cards_record = 'http://ak.hypergryph.com/user/api/inquiry/gacha'
     url_pay_record = 'https://as.hypergryph.com/u8/pay/v1/recent'
-    not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '新年特别十连寻访']
+    not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '定制寻访', '未知寻访']
 
     def __init__(self, token):
         self.token = token_format(token)
