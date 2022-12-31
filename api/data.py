@@ -173,6 +173,12 @@ def get_statistics():
 
     records = OperatorSearchRecord.select().order_by(OperatorSearchRecord.time)
 
+    for i in range(len(records) - 1, -1, -1):
+        pool = records[i].pool.name
+        if pool not in osr_pool:
+            osr_number[pool] = 0
+            osr_pool.append(pool)        
+
     for record in records:
         a_user = record.account.owner
         if a_user is not None:
@@ -180,11 +186,6 @@ def get_statistics():
                 continue
         else:
             continue
-
-        pool = record.pool.name
-        if pool not in osr_pool:
-            osr_number[pool] = 0
-            osr_pool.append(pool)
         
         month = record.time.strftime('%Y-%m')
         if month not in osr_number_month:
@@ -245,7 +246,7 @@ def get_pool_statistics(pool_name):
         'all': 0
     }
 
-    pool = OSRPool.get_or_create(name=pool_name, defaults={'type': '标准寻访'})[0]
+    pool = OSRPool.get_or_create(name=pool_name)[0]
     records = OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time)
 
     for record in records:
