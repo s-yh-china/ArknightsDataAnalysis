@@ -494,18 +494,20 @@ class ada_data():
         osr_pool = []
         osr_number_month = {}
         records = self.account.records.order_by(OperatorSearchRecord.time)
-        for record in records:
-            pool = record.pool.name
-            pool_type = record.pool.type
-            if not pool in osr_number:
+        for i in range(len(records) - 1, -1, -1):
+            pool = records[i].pool.name
+            pool_type = records[i].pool.type
+            if pool not in osr_number:
                 osr_number[pool] = 0
-            if not pool_type in osr_lucky:
+            if pool_type not in osr_lucky:
                 osr_lucky[pool_type] = {
                     '6': [], '5': [], '4': [], '3': [],
                     'count': {'6': 0, '5': 0, '4': 0, '3': 0}
                 }
             if pool not in osr_pool:
-                osr_pool.insert(0, pool)
+                osr_pool.append(pool)
+        for record in records:
+            pool_type = record.pool.type
 
             month = record.time.strftime('%Y-%m')
             if month not in osr_number_month:
@@ -513,7 +515,7 @@ class ada_data():
             operators = record.operators
             for operator in operators:
                 rarity = operator.rarity
-                osr_number[pool] += 1
+                osr_number[record.pool.name] += 1
                 osr_number['total']['all'] += 1
                 osr_number['total'][str(rarity)] += 1
                 osr_number_month[month] += 1
@@ -541,39 +543,25 @@ class ada_data():
         osr_number_month_sorted = {}
         for item in sorted(osr_number_month.keys(), reverse=True):
             osr_number_month_sorted[item] = osr_number_month[item]
-
+        
+        osr_info = {
+            'osr_lucky_avg': osr_lucky_avg,
+            'osr_lucky_count': osr_lucky_count,
+            'osr_number_month': osr_number_month_sorted,
+            'osr_number': osr_number,
+            'osr_pool': osr_pool
+        }
         if (len(records) > 0):
-            osr_info = {
-                'time': {
-                    'start_time': str(self.account.records.order_by(OperatorSearchRecord.time).limit(1)[0].time),
-                    'end_time': str(self.account.records.order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
-                },
-                'osr_number': osr_number,
-                'osr_lucky_avg': osr_lucky_avg,
-                'osr_lucky_count': osr_lucky_count,
-                'osr_number_month': osr_number_month_sorted,
-                'osr_pool': osr_pool
-            }
+            osr_info['time'] = {
+                'start_time': str(self.account.records.order_by(OperatorSearchRecord.time).limit(1)[0].time),
+                'end_time': str(self.account.records.order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
+            }            
         else:
-            osr_info = {
-                'time': {
-                    'start_time': 'N/A',
-                    'end_time': 'N/A'
-                },
-                'osr_number': {
-                    'total': {
-                        'all': -1,
-                        '3': 0,
-                        '4': 0,
-                        '5': 0,
-                        '6': 0
-                    }
-                },
-                'osr_lucky_avg': osr_lucky_avg,
-                'osr_lucky_count': osr_lucky_count,
-                'osr_number_month': osr_number_month_sorted,
-                'osr_pool': osr_pool
+            osr_info['time'] = {
+                'start_time': 'N/A',
+                'end_time': 'N/A'
             }
+            osr_info['osr_number']['total']['all'] = 0
         return osr_info
 
     def get_pool_osr_info(self, pool_name):
