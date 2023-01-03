@@ -535,16 +535,19 @@ class ada_data():
 
         osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
         osr_lucky_count = {}
+        osr_lucky_count_pool_num = {'6': 0, '5': 0, '4': 0, '3': 0}
         for osr_lucky_pool in osr_lucky:
             for r in range(3, 7):
                 osr_lucky_avg[str(r)].extend(osr_lucky[osr_lucky_pool][str(r)])
-                osr_lucky_avg[str(r)].append(osr_lucky[osr_lucky_pool]['count'][str(r)])
+                if osr_lucky[osr_lucky_pool]['count'][str(r)] != 0:
+                    osr_lucky_avg[str(r)].append(osr_lucky[osr_lucky_pool]['count'][str(r)])
+                    osr_lucky_count_pool_num[str(r)] += 1
             osr_lucky_count[osr_lucky_pool] = osr_lucky[osr_lucky_pool]['count']
         for r in range(3, 7):
-            if (len(osr_lucky_avg[str(r)]) - 1) <= 0:
+            if (len(osr_lucky_avg[str(r)]) - osr_lucky_count_pool_num[str(r)]) <= 0:
                 osr_lucky_avg[str(r)] = 0
             else:
-                osr_lucky_avg[str(r)] = (sum(osr_lucky_avg[str(r)])) / (len(osr_lucky_avg[str(r)]) - 1)
+                osr_lucky_avg[str(r)] = (sum(osr_lucky_avg[str(r)])) / (len(osr_lucky_avg[str(r)]) - osr_lucky_count_pool_num[str(r)])
 
         osr_number_month_sorted = {}
         for item in sorted(osr_number_month.keys(), reverse=True):
@@ -561,7 +564,7 @@ class ada_data():
             osr_info['time'] = {
                 'start_time': str(self.account.records.order_by(OperatorSearchRecord.time).limit(1)[0].time),
                 'end_time': str(self.account.records.order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
-            }            
+            }
         else:
             osr_info['time'] = {
                 'start_time': 'N/A',
