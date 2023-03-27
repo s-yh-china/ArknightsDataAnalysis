@@ -87,7 +87,7 @@ def clear_data():
     user = User(current_user)
     possword = request.form.get('password')
     if user.verify_password(possword):
-        cache.get.delete('user_accs_{}'.format(user.username))
+        cache.delete('user_accs_{}'.format(user.username))
         user.clear_data()
         return redirect('/')
     else:
@@ -124,7 +124,7 @@ def add_acc():
     acc_info = a_api.get_account_info()
     user = User(current_user)
     user.add_acc(acc_info['uid'])
-    cache.get.delete('user_accs_{}'.format(user.username))
+    cache.delete('user_accs_{}'.format(user.username))
     return redirect(url_for('index', addnew=acc_info['nickName']))
 
 
