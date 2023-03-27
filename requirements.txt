@@ -4,6 +4,7 @@ click==8.0.4
 colorama==0.4.4
 Flask==2.0.3
 Flask-Login==0.5.0
+Flask-Caching==1.0.0
 Flask-WTF==1.0.0
 idna==3.3
 itsdangerous==2.1.0

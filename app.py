@@ -3,12 +3,15 @@ import os.path
 from flask import Flask, redirect, request, url_for
 from flask import render_template, send_from_directory
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
+from flask_caching import Cache
 
 
 import api.data
 from api import *
 
 app = Flask(__name__)
+
+cache = Cache(app=app, config={'CACHE_TYPE': 'FileSystemCache', 'CACHE_DIR': 'cache'})
 
 app.secret_key = 'secret_rianng.cn_8023_{}'.format(uuid.uuid1())
 
@@ -84,6 +87,7 @@ def clear_data():
     user = User(current_user)
     possword = request.form.get('password')
     if user.verify_password(possword):
+        cache.get.delete('user_accs_{}'.format(user.username))
         user.clear_data()
         return redirect('/')
     else:
@@ -120,6 +124,7 @@ def add_acc():
     acc_info = a_api.get_account_info()
     user = User(current_user)
     user.add_acc(acc_info['uid'])
+    cache.get.delete('user_accs_{}'.format(user.username))
     return redirect(url_for('index', addnew=acc_info['nickName']))
 
 
@@ -182,7 +187,10 @@ def favicon():
 @login_required
 def statistics():
     accs_info = get_user_accs()
-    statistics_info = api.data.get_statistics()
+    statistics_info = cache.get('statistics')
+    if not statistics_info:
+      statistics_info = api.data.get_statistics()
+      cache.set('statistics', statistics_info, timeout=3600)
     return render_template('statistics.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
@@ -193,7 +201,11 @@ def statistics_pool():
         return redirect('/')
     pool = request.form.get('pool')
     accs_info = get_user_accs()
-    statistics_info = api.data.get_pool_statistics(pool)
+    
+    statistics_info = cache.get('statistics_pool_{}'.format(pool))
+    if not statistics_info:
+      statistics_info = api.data.get_pool_statistics(pool)
+      cache.set('statistics_pool_{}'.format(pool), statistics_info, timeout=3600)
     return render_template('statistics_pool.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
@@ -261,19 +273,25 @@ def user_settings_modify():
 @login_required
 def lucky_rank():
     accs_info = get_user_accs()
-    lucky_info = api.data.get_lucky_rank()
+    lucky_info = cache.get('luckyrank')
+    if not lucky_info:
+      lucky_info = api.data.get_lucky_rank()
+      cache.set('luckyrank', lucky_info, timeout=3600)
     return render_template('lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
 
 def get_user_accs():
     user = User(current_user)
-    accs_token = user.get_accs_token()
-
-    accs_info = []
-    for acc_token in accs_token:
+    accs_info = cache.get('user_accs_{}'.format(user.username))
+    
+    if not accs_info:
+      accs_token = user.get_accs_token()
+      accs_info = []
+      for acc_token in accs_token:
         a_api = ada_api(acc_token, only_read=True)
         acc_info = a_api.get_account_info()
         accs_info.append(acc_info)
+      cache.set('user_accs_{}'.format(user.username), accs_info, timeout=600)
 
     return accs_info
 

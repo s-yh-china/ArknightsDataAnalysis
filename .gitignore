@@ -133,6 +133,7 @@ dmypy.json
 config.json
 errlog.txt
 templates/activity.html
+cache
 
 # Fleet
 .fleet
