@@ -205,4 +205,20 @@
       </tbody>
     </table>
   </div>
+
+  <br><br>
+  <h2>额外功能</h2>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottomaccounts">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <form class="form-inline" style="display: none" role="form" id="diamond" action="/diamond" method="post">
+          <div class="form-group">
+              <input type="text" class="form-control" id="token" name="token" value={{ info.acc_info.token }}>
+          </div>
+        </form>
+        <button type="submit" form="diamond" class="btn btn-sm btn-outline-secondary">源石统计总览</button>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}

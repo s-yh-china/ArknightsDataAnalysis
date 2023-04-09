@@ -714,29 +714,69 @@ class ada_data():
         return total_money, pr_info
 
     def get_diamond_record(self):
-        records = self.account.diamond_records.order_by(DiamondRecord.time)
+        records = self.account.diamond_records.order_by(DiamondRecord.operate_time.desc())
         diamond_info = {}
         
         diamond_total_info = {
             'now': {
-                'Android': 0,
-                'IOS': 0
+                'Android': 'N/A',
+                'IOS': 'N/A'
             },
-            'typeget': [],
-            'typeuse': []
+            'totalget': {
+                'Android': 'N/A',
+                'IOS': 'N/A'
+            },
+            'totaluse': {
+                'Android': 'N/A',
+                'IOS': 'N/A'
+            },
+            'typeget': {},
+            'typeuse': {},
         }
         
-        for record in records:
-            day = record.time.strftime('%Y-%m-%d')
+        diamond_day_info = {}
         
         if (len(records) > 0):
             diamond_info['time'] = {
-                'start_time': str(self.account.diamond_records.order_by(DiamondRecord.time).limit(1)[0].time),
-                'end_time': str(self.account.diamond_records.order_by(DiamondRecord.time.desc()).limit(1)[0].time)
+                'start_time': str(self.account.diamond_records.order_by(DiamondRecord.operate_time).limit(1)[0].operate_time),
+                'end_time': str(self.account.diamond_records.order_by(DiamondRecord.operate_time.desc()).limit(1)[0].operate_time)
             }
+            
+            for record in records:
+                if (diamond_total_info['now'][record.platform] == 'N/A'):
+                   diamond_total_info['now'][record.platform] = str(record.after)
+              
+                change = record.after - record.before
+              
+                if change < 0:
+                  if diamond_total_info['totaluse'][record.platform] == 'N/A':
+                    diamond_total_info['totaluse'][record.platform] = 0
+                  if record.operation not in diamond_total_info['typeuse']:
+                    diamond_total_info['typeuse'][record.operation] = 0
+                
+                  diamond_total_info['totaluse'][record.platform] += -change
+                  diamond_total_info['typeuse'][record.operation] += -change
+                else:
+                  if diamond_total_info['totalget'][record.platform] == 'N/A':
+                    diamond_total_info['totalget'][record.platform] = 0
+                  if record.operation not in diamond_total_info['typeget']:
+                    diamond_total_info['typeget'][record.operation] = 0
+                
+                  diamond_total_info['totalget'][record.platform] += change
+                  diamond_total_info['typeget'][record.operation] += change
+              
+                day = record.operate_time.strftime('%Y-%m-%d')
+                if day not in diamond_day_info:
+                    diamond_day_info[day] = 1
+                diamond_day_info[day] += change
         else:
             diamond_info['time'] = {
                 'start_time': 'N/A',
                 'end_time': 'N/A'
             }
+        
+        diamond_info['total'] = diamond_total_info
+        diamond_info['day'] = diamond_day_info
+
+        return diamond_info
         
