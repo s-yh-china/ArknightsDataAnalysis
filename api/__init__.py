@@ -97,6 +97,18 @@ class ada_api():
             }
         }
         return info
+        
+    ################################
+    # 获取源石信息
+    ################################
+    def get_diamond_record(self):
+        diamond_record = self.get_diamond_record()
+        acc_info = self.get_account_info()
+        info = {
+            'acc_info': acc_info,
+            'diamond_record': diamond_record,
+        }
+        return info
 
     ################################
     # 发送推送

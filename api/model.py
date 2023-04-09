@@ -83,6 +83,14 @@ class UserSettings(BaseModel):
     @staticmethod
     def get_settings(user):
         return UserSettings.get_or_create(user=user, defaults={'nickname': user.username})[0]
+        
+class DiamondRecord(BaseModel):
+    account = ForeignKeyField(Account, backref='diamond_records')
+    operation = CharField()
+    platform = CharField()
+    operate_time = DateTimeField()
+    before = IntegerField()
+    after = IntegerField()
 
 
 a_config = ada_config()
@@ -97,4 +105,4 @@ if database_type == 'mysql':
     db_name = database_type_config.get('database')
     db = MySQLDatabase(db_name, host=db_host, user=db_user, passwd=db_pass, port=3306)
 database_proxy.initialize(db)
-database_proxy.create_tables([DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings])
+database_proxy.create_tables([DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings, DiamondRecord])

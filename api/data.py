@@ -327,6 +327,7 @@ class ada_data():
     url_user_info = 'https://as.hypergryph.com/u8/user/info/v1/basic'
     url_cards_record = 'http://ak.hypergryph.com/user/api/inquiry/gacha'
     url_pay_record = 'https://as.hypergryph.com/u8/pay/v1/recent'
+    url_diamond_record = 'https://ak.hypergryph.com/user/api/inquiry/diamond'
     not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '定制寻访', '未知寻访']
 
     def __init__(self, token):
@@ -338,6 +339,7 @@ class ada_data():
         self.fetch_osr(force_refresh)
         # self.fetch_osr_from_local()
         self.fetch_pay_record()
+        self.fetch_diamond_record()
 
     def fetch_account_info(self):
         bili_payload = '''
@@ -424,6 +426,52 @@ class ada_data():
                         is_new = chars_item['isNew']
                         osr_operator = OSROperator.create(name=name, rarity=rarity, is_new=is_new, index=t_index, record=osr)
                         t_index += 1
+
+    def fetch_diamond_record(self):
+        def get_diamond_by_page(page):
+            url_diamond_record_page = '{}?page={}&token={}&channelId={}'.format(self.url_diamond_record, page, quote(self.token, safe=""), self.account.channel)
+            source_from_server = self.request_http.get(url_diamond_record_page)
+            if source_from_server == 'ERROR':
+                print('ERROR: ada_data::get_diamond_record::get_diamond_by_page, page: {}, token: {}'.format(page, self.token))
+                exit(1)
+            diamond_record_page_source = json.loads(source_from_server)
+            diamond_record_page_data_list = diamond_record_page_source.get('data').get('list')
+            return diamond_record_page_data_list
+
+        last_time = None
+        if self.account.diamond_records.count() != 0:
+            records = self.account.diamond_records.order_by(DiamondRecord.operate_time.desc()).limit(1)[0]
+            last_time = records.operate_time
+        
+        flag_outdate = False
+        for page in range(1, 15):
+            if flag_outdate == True:
+                break
+            diamond_page_data = get_diamond_by_page(page)
+            if diamond_page_data == []:
+                break
+            for diamond_page_data_item in diamond_page_data:
+                ts = diamond_page_data_item['ts']
+                operation = diamond_page_data_item['operation']
+                changes = diamond_page_data_item['changes']
+                time = datetime.datetime.fromtimestamp(ts)
+                if last_time is not None and time <= last_time:
+                    flag_outdate = True
+                    break
+                for changes_item in changes:
+                    platform = changes_item['type']
+                    before = changes_item['before']
+                    after = changes_item['after']
+                    DiamondRecord.get_or_create(
+                        operate_time=time,
+                        defaults={
+                            'account': self.account,
+                            'operation': operation,
+                            'platform': platform,
+                            'before': before,
+                            'after': after
+                        }
+                    )
 
     def fetch_osr_from_local(self):
         with open('local.json', encoding='utf-8') as json_file:
@@ -664,3 +712,31 @@ class ada_data():
             total_money += pay_record.amount / 100
         # print(pr_info)
         return total_money, pr_info
+
+    def get_diamond_record(self):
+        records = self.account.diamond_records.order_by(DiamondRecord.time)
+        diamond_info = {}
+        
+        diamond_total_info = {
+            'now': {
+                'Android': 0,
+                'IOS': 0
+            },
+            'typeget': [],
+            'typeuse': []
+        }
+        
+        for record in records:
+            day = record.time.strftime('%Y-%m-%d')
+        
+        if (len(records) > 0):
+            diamond_info['time'] = {
+                'start_time': str(self.account.diamond_records.order_by(DiamondRecord.time).limit(1)[0].time),
+                'end_time': str(self.account.diamond_records.order_by(DiamondRecord.time.desc()).limit(1)[0].time)
+            }
+        else:
+            diamond_info['time'] = {
+                'start_time': 'N/A',
+                'end_time': 'N/A'
+            }
+        

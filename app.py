@@ -279,6 +279,17 @@ def lucky_rank():
       cache.set('luckyrank', lucky_info, timeout=3600)
     return render_template('lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
+@app.route('/diamond', methods=['POST', 'GET'])
+@login_required
+def diamond_record():
+    if request.method == 'GET':
+        return redirect('/') 
+    token = request.form.get('token')
+
+    accs_info = get_user_accs()
+    a_api = ada_api(token, only_read=True)
+    a_info = a_api.get_diamond_record()
+    return render_template('diamond.html', info=a_info, accounts=accs_info, user=current_user)
 
 def get_user_accs():
     user = User(current_user)
