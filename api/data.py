@@ -720,15 +720,15 @@ class ada_data():
         diamond_total_info = {
             'now': {
                 'Android': 'N/A',
-                'IOS': 'N/A'
+                'iOS': 'N/A'
             },
             'totalget': {
                 'Android': 'N/A',
-                'IOS': 'N/A'
+                'iOS': 'N/A'
             },
             'totaluse': {
                 'Android': 'N/A',
-                'IOS': 'N/A'
+                'iOS': 'N/A'
             },
             'typeget': {},
             'typeuse': {},
@@ -744,31 +744,37 @@ class ada_data():
             
             for record in records:
                 if (diamond_total_info['now'][record.platform] == 'N/A'):
-                   diamond_total_info['now'][record.platform] = str(record.after)
+                   diamond_total_info['now'][record.platform] = str(record.after) + ' 个'
               
                 change = record.after - record.before
               
                 if change < 0:
-                  if diamond_total_info['totaluse'][record.platform] == 'N/A':
-                    diamond_total_info['totaluse'][record.platform] = 0
-                  if record.operation not in diamond_total_info['typeuse']:
-                    diamond_total_info['typeuse'][record.operation] = 0
+                    if diamond_total_info['totaluse'][record.platform] == 'N/A':
+                        diamond_total_info['totaluse'][record.platform] = 0
+                    if record.operation not in diamond_total_info['typeuse']:
+                        diamond_total_info['typeuse'][record.operation] = 0
                 
-                  diamond_total_info['totaluse'][record.platform] += -change
-                  diamond_total_info['typeuse'][record.operation] += -change
+                    diamond_total_info['totaluse'][record.platform] += -change
+                    diamond_total_info['typeuse'][record.operation] += -change
                 else:
-                  if diamond_total_info['totalget'][record.platform] == 'N/A':
-                    diamond_total_info['totalget'][record.platform] = 0
-                  if record.operation not in diamond_total_info['typeget']:
-                    diamond_total_info['typeget'][record.operation] = 0
+                    if diamond_total_info['totalget'][record.platform] == 'N/A':
+                        diamond_total_info['totalget'][record.platform] = 0
+                    if record.operation not in diamond_total_info['typeget']:
+                        diamond_total_info['typeget'][record.operation] = 0
                 
-                  diamond_total_info['totalget'][record.platform] += change
-                  diamond_total_info['typeget'][record.operation] += change
+                    diamond_total_info['totalget'][record.platform] += change
+                    diamond_total_info['typeget'][record.operation] += change
               
                 day = record.operate_time.strftime('%Y-%m-%d')
                 if day not in diamond_day_info:
                     diamond_day_info[day] = 1
                 diamond_day_info[day] += change
+                
+            for platform in diamond_total_info['totaluse'].keys():
+                if diamond_total_info['totaluse'][platform] != 'N/A':
+                    diamond_total_info['totaluse'][platform] = str(diamond_total_info['totaluse'][platform]) + ' 个'
+                if diamond_total_info['totalget'][platform] != 'N/A':
+                    diamond_total_info['totalget'][platform] = str(diamond_total_info['totalget'][platform]) + ' 个'
         else:
             diamond_info['time'] = {
                 'start_time': 'N/A',
