@@ -742,6 +742,9 @@ class ada_data():
                 'end_time': str(self.account.diamond_records.order_by(DiamondRecord.operate_time.desc()).limit(1)[0].operate_time)
             }
             
+            diamond_typeget_info = {}
+            diamond_typeuse_info = {}
+            
             for record in records:
                 if (diamond_total_info['now'][record.platform] == 'N/A'):
                    diamond_total_info['now'][record.platform] = str(record.after) + ' 个'
@@ -751,19 +754,19 @@ class ada_data():
                 if change < 0:
                     if diamond_total_info['totaluse'][record.platform] == 'N/A':
                         diamond_total_info['totaluse'][record.platform] = 0
-                    if record.operation not in diamond_total_info['typeuse']:
-                        diamond_total_info['typeuse'][record.operation] = 0
+                    if record.operation not in diamond_typeuse_info:
+                        diamond_typeuse_info[record.operation] = 0
                 
                     diamond_total_info['totaluse'][record.platform] += -change
-                    diamond_total_info['typeuse'][record.operation] += -change
+                    diamond_typeuse_info[record.operation] += -change
                 else:
                     if diamond_total_info['totalget'][record.platform] == 'N/A':
                         diamond_total_info['totalget'][record.platform] = 0
-                    if record.operation not in diamond_total_info['typeget']:
-                        diamond_total_info['typeget'][record.operation] = 0
+                    if record.operation not in diamond_typeget_info:
+                        diamond_typeget_info[record.operation] = 0
                 
                     diamond_total_info['totalget'][record.platform] += change
-                    diamond_total_info['typeget'][record.operation] += change
+                    diamond_typeget_info[record.operation] += change
               
                 day = record.operate_time.strftime('%Y-%m-%d')
                 if day not in diamond_day_info:
@@ -775,6 +778,18 @@ class ada_data():
                     diamond_total_info['totaluse'][platform] = str(diamond_total_info['totaluse'][platform]) + ' 个'
                 if diamond_total_info['totalget'][platform] != 'N/A':
                     diamond_total_info['totalget'][platform] = str(diamond_total_info['totalget'][platform]) + ' 个'
+                
+            diamond_typeget_info_sorted = {}
+            for key, value in sorted(diamond_typeget_info.items(), key=lambda x:x[1], reverse=True):
+                diamond_typeget_info_sorted[key] = value
+            diamond_total_info['typeget'] = diamond_typeget_info_sorted
+            
+            diamond_typeuse_info_sorted = {}
+            for key, value in sorted(diamond_typeuse_info.items(), key=lambda x:x[1], reverse=True):
+                diamond_typeuse_info_sorted[key] = value
+            diamond_total_info['typeuse'] = diamond_typeuse_info_sorted
+                
+                
         else:
             diamond_info['time'] = {
                 'start_time': 'N/A',
