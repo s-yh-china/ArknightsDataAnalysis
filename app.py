@@ -182,6 +182,9 @@ def analyze_pool_results():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', minetype='text/plain')
 
 @app.route('/statistics', methods=['POST', 'GET'])
 @login_required
