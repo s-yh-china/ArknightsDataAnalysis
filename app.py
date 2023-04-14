@@ -71,7 +71,6 @@ def login():
                 emsg = 'Wrong username or password.'
     return render_template('login.html', form=form, emsg=emsg)
 
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -98,6 +97,7 @@ def clear_data():
 @login_required
 def index():
     accs_info = get_user_accs()
+    
     if request.method == 'GET':
         addnew = request.args.get('addnew')
         if addnew is not None:
@@ -294,6 +294,12 @@ def diamond_record():
     a_info = a_api.get_diamond_record()
     return render_template('diamond.html', info=a_info, accounts=accs_info, user=current_user)
 
+@app.route('/author', methods=['GET'])
+@login_required
+def author_page():
+    accs_info = get_user_accs()
+    return render_template('author.html', accounts=accs_info, user=current_user)
+
 def get_user_accs():
     user = User(current_user)
     accs_info = cache.get('user_accs_{}'.format(user.username))
@@ -308,7 +314,6 @@ def get_user_accs():
       cache.set('user_accs_{}'.format(user.username), accs_info, timeout=600)
 
     return accs_info
-
 
 def get_user_settings_info():
     a_user_settings = User(current_user).get_settings()

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block cur_user %}
+    {% include "cur_user.html" %}
+{% endblock %}
+
+{% block main %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">作者列表</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2" style="margin: 0 8px;">
+        <a href="{{ url_for('index') }}">
+            <button type="text" class="btn btn-sm btn-outline-secondary">Index</button>
+        </a>
+      </div>
+    </div>
+  </div>
+  
+
+  <div class="card bg-light col-10 mx-auto">
+	<div class="row no-gutters">
+		<div class="col-md-1 justify-content-center">
+			<img decoding="async" src="https://avatars.githubusercontent.com/u/78133217?s=90&v=4" class="rounded-circle image-fluid mx-auto">
+		</div>
+		<div class="col-md-8">
+			<div class="card-body">
+				<h5 class="card-title">Rian Ng</h5>
+				<p class="card-text">项目原作者，给我带来了很多可以抄的网页模板。</p>
+			</div>
+		</div>
+		<div class="col-md-2">
+			<div class="card-body">
+				<a href="https://github.com/RWoxiN", target="_blank", class="btn btn-primary">Github</a>
+			</div>
+		</div>
+	</div>
+  </div>
+  
+  <div class="card bg-light col-10 mx-auto">
+	<div class="row no-gutters">
+		<div class="col-md-1 justify-content-center">
+			<img decoding="async" src="https://avatars.githubusercontent.com/u/58360096?s=90&v=4" class="rounded-circle image-fluid mx-auto">
+		</div>
+		<div class="col-md-8">
+			<div class="card-body">
+				<h5 class="card-title">Violetc</h5>
+				<p class="card-text">目前的主要开发者</p>
+			</div>
+		</div>
+		<div class="col-md-2">
+			<div class="card-body">
+				<a href="https://github.com/s-yh-china", target="_blank", class="btn btn-primary">Github</a>
+			</div>
+		</div>
+	</div>
+  </div>
+
+{% endblock %}
