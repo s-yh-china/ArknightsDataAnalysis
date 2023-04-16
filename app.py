@@ -93,6 +93,14 @@ def clear_data():
         return redirect(url_for('user_settings'))
 
 
+@app.before_request
+def host_check():
+    hostname = ada_config().config.get('web').get('hostname')
+    if hostname != "" and request.host != hostname:
+        return redirect("http://" + hostname + request.path, code=301)
+    return None
+
+
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
@@ -282,6 +290,7 @@ def lucky_rank():
       cache.set('luckyrank', lucky_info, timeout=3600)
     return render_template('lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
+
 @app.route('/diamond', methods=['POST', 'GET'])
 @login_required
 def diamond_record():
@@ -294,11 +303,13 @@ def diamond_record():
     a_info = a_api.get_diamond_record()
     return render_template('diamond.html', info=a_info, accounts=accs_info, user=current_user)
 
+
 @app.route('/author', methods=['GET'])
 @login_required
 def author_page():
     accs_info = get_user_accs()
     return render_template('author.html', accounts=accs_info, user=current_user)
+
 
 def get_user_accs():
     user = User(current_user)
@@ -314,6 +325,7 @@ def get_user_accs():
       cache.set('user_accs_{}'.format(user.username), accs_info, timeout=600)
 
     return accs_info
+
 
 def get_user_settings_info():
     a_user_settings = User(current_user).get_settings()
