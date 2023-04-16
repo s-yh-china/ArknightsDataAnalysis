@@ -19,6 +19,17 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+hostname = ada_config().config.get('web').get('hostname')
+if hostname == '':
+    hostname = None
+
+
+@app.before_request
+def host_check():
+    if hostname and request.host != hostname:
+        return redirect('http://' + hostname + request.path, code=301)
+    return None
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -91,14 +102,6 @@ def clear_data():
         return redirect('/')
     else:
         return redirect(url_for('user_settings'))
-
-
-@app.before_request
-def host_check():
-    hostname = ada_config().config.get('web').get('hostname')
-    if hostname != "" and request.host != hostname:
-        return redirect("http://" + hostname + request.path, code=301)
-    return None
 
 
 @app.route('/', methods=['GET', 'POST'])
