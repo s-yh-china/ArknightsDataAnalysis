@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from peewee import *
+from playhouse.migrate import *
 from .config import ada_config
 
 database_proxy = Proxy()
@@ -14,6 +15,7 @@ class DBUser(BaseModel):
     authenticated = BooleanField(default=False)
     username = CharField(max_length=20, unique=True)
     password = CharField(max_length=30)
+    accept_disclaimers = BooleanField(default=False)
 
     def is_authenticated(self):
         return self.authenticated
@@ -84,6 +86,7 @@ class UserSettings(BaseModel):
     def get_settings(user):
         return UserSettings.get_or_create(user=user, defaults={'nickname': user.username})[0]
         
+        
 class DiamondRecord(BaseModel):
     account = ForeignKeyField(Account, backref='diamond_records')
     operation = CharField()
@@ -93,16 +96,32 @@ class DiamondRecord(BaseModel):
     after = IntegerField()
 
 
+def update_database_version(a_config, database_version, mgrt):
+    if database_version == 'v0.0.0':
+        database_version = 'v1.0.0'
+        migrate(
+            mgrt.add_column(table='DBUser',column_name='accept_disclaimers',field=BooleanField(default=False)),
+        )
+    a_config.config['database']['database_version'] = database_version
+    a_config.update_config()
+
+    
 a_config = ada_config()
-database_type, database_type_config = a_config.load_config_database()
+database_type, database_type_config, database_version = a_config.load_config_database()
 if database_type == 'sqlite3':
     db_name = database_type_config.get('filename')
     db = SqliteDatabase(db_name)
+    mgrt = SqliteMigrator(db)
 if database_type == 'mysql':
     db_host = database_type_config.get('host')
     db_user = database_type_config.get('user')
     db_pass = database_type_config.get('password')
     db_name = database_type_config.get('database')
     db = MySQLDatabase(db_name, host=db_host, user=db_user, passwd=db_pass, port=3306)
+    mgrt = MySQLMigrator(db)
+    
+if database_version != a_config.database_version:
+    update_database_version(a_config, database_version, mgrt)
+
 database_proxy.initialize(db)
 database_proxy.create_tables([DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings, DiamondRecord])

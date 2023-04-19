@@ -3,6 +3,7 @@ import os, json
 
 class ada_config():
     version = 'v2.4.1'
+    database_version = 'v1.0.0'
     config = {
         "version": "{}".format(version),
         "force_refresh": {
@@ -18,7 +19,8 @@ class ada_config():
                 "user": "",
                 "password": "",
                 "database": ""
-            }
+            },
+            "database_version": "{}".format(database_version),
         },
         "web": {
             "host": "127.0.0.1",
@@ -114,7 +116,7 @@ class ada_config():
         if not database_type in database_type_list:
             exit("ERROR: DATABASE_TYPE must be in {}".format(database_type_list))
         type_config = database_config.get(database_type)
-        return database_type, type_config
+        return database_type, type_config, database_config.get('database_version', 'v0.0.0')
     
     def load_config_push(self):
         self.load_config()
