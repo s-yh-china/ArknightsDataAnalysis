@@ -16,6 +16,9 @@ for account in Account.select():
     try:
         a_api = ada_api(token, force_refresh=force_refresh_enabled)
         a_info = a_api.get_account_info()
+        if UserSettings.get_settings(account.owner).is_auto_gift:
+            a_api.auto_get_gift()
+            print('{}(uid:{}) gift get succees'.format(a_info.get('nickName'), a_info.get('uid')))
         print('{}(uid:{}) sync succees'.format(a_info.get('nickName'), a_info.get('uid')))
     except:
         a_user = account.owner

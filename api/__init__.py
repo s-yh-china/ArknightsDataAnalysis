@@ -109,6 +109,12 @@ class ada_api():
             'diamond_record': diamond_record,
         }
         return info
+        
+    ################################
+    # 自动领取礼包
+    ################################
+    def auto_get_gift(self):
+        self.a_data.auto_gift_get()
 
     ################################
     # 发送推送

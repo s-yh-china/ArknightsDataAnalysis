@@ -17,7 +17,12 @@
         </form>
         <button type="submit" form="accept" class="btn btn-sm btn-outline-secondary">同意并继续使用</button>
       </div>
-    </div>	
+	  <div class="btn-group me-2">
+		<a href="{{ url_for('logout') }}">
+			<button type="text" class="btn btn-sm btn-outline-secondary">不同意并退出登录</button>
+		</a>
+      </div>	
+    </div>
   </div>
   
   <h2>使用此网站，则视为您同意以下内容</h2>

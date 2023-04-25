@@ -3,6 +3,7 @@ from operator import is_
 import requests, json, datetime
 from urllib.parse import quote
 from .model import *
+import random
 
 
 def f_hide_mid(info, count=4, fix='*'):
@@ -323,16 +324,32 @@ class ada_data():
             if r.status_code == 200:
                 return r.content
             return 'ERROR'
+        
+        def post_with_csrf(url, data, token):
+            headers = {
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.58',
+                'x-csrf-token': token,
+                'cookie': 'csrf_token={}'.format(token),
+                'content-type': 'application/json;charset=UTF-8'
+            }
+            r = requests.post(url, data=data, headers=headers)
+            if r.status_code == 200:
+                return r.content
+            return 'ERROR'            
     
     url_user_info = 'https://as.hypergryph.com/u8/user/info/v1/basic'
     url_cards_record = 'http://ak.hypergryph.com/user/api/inquiry/gacha'
     url_pay_record = 'https://as.hypergryph.com/u8/pay/v1/recent'
     url_diamond_record = 'https://ak.hypergryph.com/user/api/inquiry/diamond'
+    url_gift_record = 'https://ak.hypergryph.com/user/api/gift/getExchangeLog'
+    url_gift_get = 'https://ak.hypergryph.com/user/api/gift/exchange'
     not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '定制寻访', '未知寻访']
+
+    gift_codes = ['2023SPECIALCANDY']
 
     def __init__(self, token):
         self.token = token_format(token)
-    
+
     def fetch_data(self, force_refresh=False):
         if not self.fetch_account_info():
             exit(1)
@@ -340,6 +357,7 @@ class ada_data():
         # self.fetch_osr_from_local()
         self.fetch_pay_record()
         self.fetch_diamond_record()
+        self.fetch_gift_record()
 
     def fetch_account_info(self):
         bili_payload = '''
@@ -463,9 +481,9 @@ class ada_data():
                     before = changes_item['before']
                     after = changes_item['after']
                     DiamondRecord.get_or_create(
+                        account=self.account,
                         operate_time=time,
                         defaults={
-                            'account': self.account,
                             'operation': operation,
                             'platform': platform,
                             'before': before,
@@ -533,6 +551,27 @@ class ada_data():
                     'amount': amount
                 }
             )
+            
+    def fetch_gift_record(self):
+        url_gift_record = '{}?token={}&channelId={}'.format(self.url_gift_record, quote(self.token, safe=""), self.account.channel)
+        source_from_server = self.request_http.get(url_gift_record)
+        if source_from_server == 'ERROR':
+            print('ERROR: ada_data::fetch_gift_record, token: {}'.format(self.token))
+            exit(1)
+        gift_record_source = json.loads(source_from_server).get('data')
+        for gift_record_item in gift_record_source:
+            time = datetime.datetime.fromtimestamp(int(gift_record_item['ts']))
+            name = gift_record_item['giftName']
+            code = gift_record_item['code']
+            GiftRecord.get_or_create(
+                account=self.account,
+                time=time,
+                defaults={
+                    'code': code,
+                    'name': name
+                }
+            )
+        
 
     def get_osr_info(self):
         osr_number = {
@@ -801,3 +840,26 @@ class ada_data():
 
         return diamond_info
         
+    def auto_gift_get(self):
+        used_gift_code = []
+        for gift_record in GiftRecord.select().filter(account=self.account):
+            used_gift_code.append(gift_record.code)
+        
+        csrf_token = ''
+        for char in random.sample('abcdefghijklmnopqrstuvwxyzABCDEFGHIGKLMNO{QRSTUYWXYZ-', 24):
+            csrf_token += char
+        for gift_code in self.gift_codes:
+            if gift_code in used_gift_code:
+                continue
+            payload = '''
+            {{
+                "giftCode": "{}",
+                "token": "{}",
+                "channelId": {}
+            }}
+            '''.format(gift_code, self.token, self.account.channel)
+            source_from_server = self.request_http.post_with_csrf(self.url_gift_get, payload, csrf_token)            
+            if source_from_server == 'ERROR':
+                print('ERROR: ada_data::auto_gift_get, token: {}'.format(self.token))
+                exit(1)
+ 

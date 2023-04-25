@@ -75,6 +75,7 @@ class UserSettings(BaseModel):
     private_qq = CharField(max_length=20, null=True)
     is_display_nick = BooleanField(default=False)
     nickname = CharField(max_length=20, unique=True)
+    is_auto_gift = BooleanField(default=False)
 
     def get_nickname(self):
         if self.nickname == '':
@@ -85,7 +86,7 @@ class UserSettings(BaseModel):
     @staticmethod
     def get_settings(user):
         return UserSettings.get_or_create(user=user, defaults={'nickname': user.username})[0]
-        
+
         
 class DiamondRecord(BaseModel):
     account = ForeignKeyField(Account, backref='diamond_records')
@@ -96,11 +97,23 @@ class DiamondRecord(BaseModel):
     after = IntegerField()
 
 
+class GiftRecord(BaseModel):
+    account = ForeignKeyField(Account, backref='gift_records')
+    time = DateTimeField()
+    code = CharField()
+    name = CharField()
+
+
 def update_database_version(a_config, database_version, mgrt):
     if database_version == 'v0.0.0':
         database_version = 'v1.0.0'
         migrate(
             mgrt.add_column(table='DBUser',column_name='accept_disclaimers',field=BooleanField(default=False)),
+        )
+    if database_version == 'v1.0.0':
+        database_version = 'v1.1.0'
+        migrate(
+            mgrt.add_column(table='UserSettings',column_name='is_auto_gift',field=BooleanField(default=False)),
         )
     a_config.config['database']['database_version'] = database_version
     a_config.update_config()

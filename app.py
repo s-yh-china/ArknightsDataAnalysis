@@ -58,13 +58,15 @@ def register():
                 register_user_info = get_user(username)
                 register_user = User(register_user_info)
                 login_user(register_user)
-                return redirect(url_for('index'))
+                return redirect(url_for('disclaimers'))
             else:
                 emsg = 'Different password.'
         else:
             user = User(user_info)
             if user.verify_password(password1):
                 login_user(user)
+                if not user_info.accept_disclaimers:
+                    return redirect(url_for('disclaimers'))
                 return redirect(url_for('index'))
             emsg = 'Username exists.'
     return render_template('register.html', form=form, emsg=emsg)
@@ -85,12 +87,12 @@ def login():
             if user.verify_password(password):
                 login_user(user)
                 if not user_info.accept_disclaimers:
-                    session['not_disclaimers'] = True
                     return redirect(url_for('disclaimers'))
                 return redirect(request.args.get('next') or url_for('index'))
             else:
                 emsg = 'Wrong username or password.'
     return render_template('login.html', form=form, emsg=emsg)
+
 
 @app.route('/logout')
 @login_required
@@ -256,6 +258,7 @@ def user_settings_modify():
     private_qq = request.form.get('private_qq')
     nickname = request.form.get('nickname')
     is_display_nick = request.form.get('display_nick')
+    is_auto_gift = request.form.get('is_auto_gift')
     if is_statistics:
         if is_statistics == 'true':
             a_user_settings.is_statistics = True
@@ -289,6 +292,11 @@ def user_settings_modify():
             a_user_settings.is_display_nick = True
         elif is_display_nick == 'false':
             a_user_settings.is_display_nick = False
+    elif is_auto_gift:
+        if is_auto_gift == 'true':
+            a_user_settings.is_auto_gift = True
+        elif is_auto_gift == 'false':
+            a_user_settings.is_auto_gift = False
 
     a_user_settings.save()
     return redirect(url_for('user_settings'))
@@ -335,6 +343,9 @@ def disclaimers():
             if session.get('not_disclaimers'):
                 session.pop('not_disclaimers')
             return redirect(url_for('index'))
+            
+    if not current_user.accept_disclaimers:
+        session['not_disclaimers'] = True
 
     return render_template('disclaimers.html', user=current_user)
 
@@ -365,6 +376,7 @@ def get_user_settings_info():
         'private_qq': api.data.f_hide_mid(a_user_settings.private_qq) if a_user_settings.private_qq is not None else '',
         'is_display_nick': '开启' if a_user_settings.is_display_nick else '关闭',
         'nickname': a_user_settings.get_nickname(),
+        'is_auto_gift': '开启' if a_user_settings.is_auto_gift else '关闭',
     }
     return settings_info
 
