@@ -137,4 +137,4 @@ if database_version != a_config.database_version:
     update_database_version(a_config, database_version, mgrt)
 
 database_proxy.initialize(db)
-database_proxy.create_tables([DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings, DiamondRecord])
+database_proxy.create_tables([DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings, DiamondRecord, GiftRecord])
