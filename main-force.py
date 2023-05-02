@@ -9,7 +9,7 @@ print('data sync start')
 for account in Account.select():
     token = account.token
     try:
-        a_api = ada_api(token, force_refresh=False)
+        a_api = ada_api(token, force_refresh=True)
         a_info = a_api.get_account_info()
         if UserSettings.get_settings(account.owner).is_auto_gift:
             a_api.auto_get_gift()
