@@ -394,8 +394,8 @@ class ada_data():
         if not account.token == self.token:
             account.token = self.token
             account.save()
-        if not account.nickName == nickName:
-            account.nickName = nickName
+        if not account.nickname == nickName:
+            account.nickname = nickName
             account.save()
         self.account = account
         return True
