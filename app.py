@@ -38,6 +38,7 @@ def not_disclaimers():
     if session.get('not_disclaimers'):
         return redirect(url_for('disclaimers'))
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id)
@@ -348,6 +349,11 @@ def disclaimers():
         session['not_disclaimers'] = True
 
     return render_template('disclaimers.html', user=current_user)
+
+
+@app.route('/test')
+def test():
+    return "ok"
 
 
 def get_user_accs():

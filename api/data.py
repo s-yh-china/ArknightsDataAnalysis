@@ -57,6 +57,89 @@ def token_format(token):
     return real_token.replace(' ', '')
 
 
+def get_new_lucky_rank(pool):
+    osr_lucky = {}
+    enable_accounts = []
+    
+    for account in Account.select():
+        if account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
+            enable_accounts.append(account)
+            osr_lucky[account] = {
+                'six': 0,
+                'count': 0
+            }
+    
+    records = OperatorSearchRecord.select().where(OperatorSearchRecord.pool == pool).where(OperatorSearchRecord.account.in_(enable_accounts)).order_by(OperatorSearchRecord.time)
+    for record in records:
+        operators = record.operators
+        account = record.account
+        for operator in operators:
+            osr_lucky[account]['count'] += 1
+            if operator.rarity == 6:
+                osr_lucky[account]['six'] += 1
+                            
+    osr_lucky_avg = {}
+    osr_lucky_name = {}
+    for osr_account in osr_lucky:
+        osr_user_settings = UserSettings.get_settings(osr_account.owner)
+
+        if osr_user_settings.is_display_name:
+            if osr_user_settings.is_display_full:
+                osr_account_name = osr_account.nickname
+            else:
+                osr_account_name = f_hide_mid(osr_account.nickname, count=7)
+        else:
+            uidlen = len(osr_account.uid) - 1
+            osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uidlen - 2: uidlen]))
+        if osr_user_settings.is_display_nick:
+            osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
+            
+        osr_lucky_name[osr_account] = osr_account_name
+
+        if osr_lucky[osr_account]['six'] > 0:
+            osr_lucky_avg[osr_account] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
+
+    osr_lucky_rank = []
+    osr_lucky_rank_index = 1
+    osr_lucky_added = []
+    for key, value in sorted(osr_lucky_avg.items(), key=lambda x:x[1], reverse=False):
+        if osr_lucky_rank_index > 10:
+            break
+        player = {
+            'rank': osr_lucky_rank_index,
+            'nickname': osr_lucky_name[key],
+            'number': value
+        }
+        osr_lucky_rank.append(player)
+        osr_lucky_added.append(key)
+        osr_lucky_rank_index += 1
+
+    osr_unlucky_rank = []
+    osr_unlucky_rank_index = 1
+    for key, value in sorted(osr_lucky_avg.items(), key=lambda x:x[1], reverse=True):
+        if osr_unlucky_rank_index > 10:
+            break
+        if key in osr_lucky_added:
+            continue
+        player = {
+            'rank': osr_unlucky_rank_index,
+            'nickname': osr_lucky_name[key],
+            'number': value
+        }
+        osr_unlucky_rank.append(player)
+        osr_unlucky_rank_index += 1
+
+    info = {
+        'time': {
+            'start_time': str(records[0].time),
+            'end_time': str(records[len(records) - 1].time)
+        },
+        'lucky': osr_lucky_rank,
+        'unlucky': osr_unlucky_rank
+    }
+    return info
+            
+
 def get_lucky_rank():
     osr_lucky = {}
     enable_accounts = []
