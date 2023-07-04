@@ -419,7 +419,6 @@ if __name__ == '__main__':
         file = open('templates/activity.html', 'w')
         file.close()
 
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        thread_pool.register_async_timer(update_luckyrank, 3600, cache)
-        thread_pool.register_async_timer(update_statistics, 3600, cache)
+    thread_pool.register_async_timer(update_luckyrank, 3600, cache)
+    thread_pool.register_async_timer(update_statistics, 3600, cache)
     app.run(debug=debug, port=port, host=host)
