@@ -5,6 +5,7 @@ from .push import *
 from .user import *
 from .model import DBUser
 
+
 class ada_api():
     ################################
     # 初始化并将官网数据增量更新到数据库
@@ -115,20 +116,3 @@ class ada_api():
     ################################
     def auto_get_gift(self):
         self.a_data.auto_gift_get()
-
-    ################################
-    # 发送推送
-    ################################
-    def push(self, push_time=None):
-        end_time = self.account.records.order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time
-        end_ts = time.mktime(end_time.timetuple())
-        if push_time is not None:
-            if end_ts <= push_time:
-                return end_ts
-
-        info = self.get_all_info()
-
-        push_body = self.a_push.parse_body(info)
-        self.a_push.push(push_body)
-        return end_ts
-

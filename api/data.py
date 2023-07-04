@@ -57,6 +57,13 @@ def token_format(token):
     return real_token.replace(' ', '')
 
 
+def get_all_pool():
+    osr_pool = []
+    for pool in OSRPool.select():
+        osr_pool.append(pool.name)
+    return osr_pool
+
+
 def get_new_lucky_rank(pool):
     osr_lucky = {}
     enable_accounts = []
@@ -96,7 +103,7 @@ def get_new_lucky_rank(pool):
             
         osr_lucky_name[osr_account] = osr_account_name
 
-        if osr_lucky[osr_account]['six'] > 0:
+        if osr_lucky[osr_account]['six'] > 1:
             osr_lucky_avg[osr_account] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
 
     osr_lucky_rank = []
@@ -146,7 +153,7 @@ def get_lucky_rank():
 
     accounts = Account.select()
     for account in accounts:
-        if account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
+        if account.available and account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
             enable_accounts.append(account)
             osr_lucky[account] = {
                 'six': 0,
@@ -432,6 +439,7 @@ class ada_data():
 
     def __init__(self, token):
         self.token = token_format(token)
+        self.account = None
 
     def fetch_data(self, force_refresh=False):
         if not self.fetch_account_info():
@@ -471,15 +479,24 @@ class ada_data():
             return False
         user_info_source = json.loads(source_from_server).get('data')
         uid = user_info_source.get('uid')
-        nickName = user_info_source.get('nickName')
-        channelId = str(user_info_source.get('channelMasterId'))
-        account = Account.get_or_create(uid=uid, defaults={'nickname': nickName, 'token': self.token, 'channel': channelId})[0]
+        nick_name = user_info_source.get('nickName')
+        channel_id = str(user_info_source.get('channelMasterId'))
+        account = Account.get_or_create(uid=uid, defaults={'nickname': nick_name, 'token': self.token, 'channel': channel_id})[0]
+
+        need_save = False
         if not account.token == self.token:
             account.token = self.token
+            need_save = True
+        if not account.nickname == nick_name:
+            account.nickname = nick_name
+            need_save = True
+        if not account.available:
+            account.available = True
+            need_save = True
+
+        if need_save:
             account.save()
-        if not account.nickname == nickName:
-            account.nickname = nickName
-            account.save()
+
         self.account = account
         return True
 
@@ -658,7 +675,6 @@ class ada_data():
                 }
             )
         
-
     def get_osr_info(self):
         osr_number = {
             'total': {

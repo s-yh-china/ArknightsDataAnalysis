@@ -20,6 +20,8 @@ for account in Account.select():
         qq = ''
         if a_user is not None:
             qq = UserSettings.get_settings(a_user).private_qq
+        account.available = False
+        account.save()
         failMes = '{}(uid:{},qq:{}) sync fail by token({})'.format(account.nickname, account.uid, qq, account.token)
         print(failMes)
         errorlog.write(datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ') + failMes + '\n')

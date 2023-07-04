@@ -36,6 +36,7 @@ class Account(BaseModel):
     token = CharField(max_length=300)
     owner = ForeignKeyField(DBUser, backref='ark_accs', null=True)
     channel = CharField(max_length=2)
+    available = BooleanField(default=True)
 
 
 class OSRPool(BaseModel):
@@ -108,12 +109,17 @@ def update_database_version(a_config, database_version, mgrt):
     if database_version == 'v0.0.0':
         database_version = 'v1.0.0'
         migrate(
-            mgrt.add_column(table='DBUser',column_name='accept_disclaimers',field=BooleanField(default=False)),
+            mgrt.add_column(table='DBUser', column_name='accept_disclaimers', field=BooleanField(default=False)),
         )
     if database_version == 'v1.0.0':
         database_version = 'v1.1.0'
         migrate(
-            mgrt.add_column(table='UserSettings',column_name='is_auto_gift',field=BooleanField(default=False)),
+            mgrt.add_column(table='UserSettings', column_name='is_auto_gift', field=BooleanField(default=False)),
+        )
+    if database_version == 'v1.1.0':
+        database_version = 'v1.2.0'
+        migrate(
+            mgrt.add_column(table='Account', column_name='available', field=BooleanField(default=True))
         )
     a_config.config['database']['database_version'] = database_version
     a_config.update_config()

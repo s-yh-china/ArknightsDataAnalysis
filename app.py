@@ -7,11 +7,12 @@ from flask_caching import Cache
 
 
 import api.data
+from api.thread_pool import MyThreadPool
 from api import *
 
 app = Flask(__name__)
-
 cache = Cache(app=app, config={'CACHE_TYPE': 'FileSystemCache', 'CACHE_DIR': 'cache'})
+thread_pool = MyThreadPool()
 
 app.secret_key = 'secret_rianng.cn_8023_{}'.format(uuid.uuid1())
 
@@ -159,7 +160,7 @@ def refresh_ada():
     if request.method == 'GET':
         return redirect('/') 
     token = request.form.get('token')
-    a_api = ada_api(token)
+    thread_pool.run_async(refresh_account, token, False)
     return redirect('/')
 
 
@@ -169,7 +170,7 @@ def refresh_force_ada():
     if request.method == 'GET':
         return redirect('/') 
     token = request.form.get('token')
-    a_api = ada_api(token, force_refresh=True)
+    thread_pool.run_async(refresh_account, token, True)
     return redirect('/')
 
 
@@ -177,9 +178,9 @@ def refresh_force_ada():
 @login_required
 def analyze_results():
     if request.method == 'GET':
-        return redirect('/') 
-    token = request.form.get('token')
+        return redirect('/')
 
+    token = request.form.get('token')
     accs_info = get_user_accs()
     a_api = ada_api(token, only_read=True)
     a_info = a_api.get_all_info()
@@ -207,18 +208,17 @@ def analyze_pool_results():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+
 @app.route('/robots.txt')
 def robots():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt')
+
 
 @app.route('/statistics', methods=['POST', 'GET'])
 @login_required
 def statistics():
     accs_info = get_user_accs()
     statistics_info = cache.get('statistics')
-    if not statistics_info:
-      statistics_info = api.data.get_statistics()
-      cache.set('statistics', statistics_info, timeout=3600)
     return render_template('statistics.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
@@ -231,9 +231,6 @@ def statistics_pool():
     accs_info = get_user_accs()
     
     statistics_info = cache.get('statistics_pool_{}'.format(pool))
-    if not statistics_info:
-      statistics_info = api.data.get_pool_statistics(pool)
-      cache.set('statistics_pool_{}'.format(pool), statistics_info, timeout=3600)
     return render_template('statistics_pool.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
@@ -308,9 +305,6 @@ def user_settings_modify():
 def lucky_rank():
     accs_info = get_user_accs()
     lucky_info = cache.get('luckyrank')
-    if not lucky_info:
-      lucky_info = api.data.get_lucky_rank()
-      cache.set('luckyrank', lucky_info, timeout=3600)
     return render_template('lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
 
@@ -361,13 +355,13 @@ def get_user_accs():
     accs_info = cache.get('user_accs_{}'.format(user.username))
     
     if not accs_info:
-      accs_token = user.get_accs_token()
-      accs_info = []
-      for acc_token in accs_token:
-        a_api = ada_api(acc_token, only_read=True)
-        acc_info = a_api.get_account_info()
-        accs_info.append(acc_info)
-      cache.set('user_accs_{}'.format(user.username), accs_info, timeout=600)
+        accs_token = user.get_accs_token()
+        accs_info = []
+        for acc_token in accs_token:
+            a_api = ada_api(acc_token, only_read=True)
+            acc_info = a_api.get_account_info()
+            accs_info.append(acc_info)
+        cache.set('user_accs_{}'.format(user.username), accs_info, timeout=600)
 
     return accs_info
 
@@ -396,6 +390,23 @@ def has_bad_char(info):
     return False
 
 
+def update_luckyrank(flask_cache):
+    lucky_info = api.data.get_lucky_rank()
+    flask_cache.set('luckyrank', lucky_info, timeout=3700)
+
+
+def update_statistics(flask_cahce):
+    statistics_info = api.data.get_statistics()
+    flask_cahce.set('statistics', statistics_info, timeout=3700)
+    for pool in api.data.get_all_pool():
+        statistics_pool_info = api.data.get_pool_statistics(pool)
+        flask_cahce.set('statistics_pool_{}'.format(pool), statistics_pool_info, timeout=3700)
+
+
+def refresh_account(token, force):
+    ada_api(token, force_refresh=force)
+
+
 if __name__ == '__main__':
     web_config = ada_config().config.get('web')
     debug = web_config.get('debug')
@@ -408,4 +419,7 @@ if __name__ == '__main__':
         file = open('templates/activity.html', 'w')
         file.close()
 
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        thread_pool.register_async_timer(update_luckyrank, 3600, cache)
+        thread_pool.register_async_timer(update_statistics, 3600, cache)
     app.run(debug=debug, port=port, host=host)

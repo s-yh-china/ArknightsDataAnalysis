@@ -3,7 +3,7 @@ import os, json
 
 class ada_config():
     version = 'v2.4.1'
-    database_version = 'v1.1.0'
+    database_version = 'v1.2.0'
     config = {
         "version": "{}".format(version),
         "force_refresh": {
