@@ -31,7 +31,7 @@ def host_check():
     if hostname and request.host != hostname:
         return redirect('http://' + hostname + request.path, code=301)
     return None
-    
+
 
 @app.before_request
 def not_disclaimers():
@@ -124,7 +124,7 @@ def clear_data():
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    accs_info = get_user_accs() 
+    accs_info = get_user_accs()
     if request.method == 'GET':
         addnew = request.args.get('addnew')
         if addnew is not None:
@@ -145,7 +145,7 @@ def index():
 @login_required
 def add_acc():
     if request.method == 'GET':
-        return redirect('/') 
+        return redirect('/')
     token = request.form.get('token')
     a_api = ada_api(token)
     acc_info = a_api.get_account_info()
@@ -159,7 +159,7 @@ def add_acc():
 @login_required
 def refresh_ada():
     if request.method == 'GET':
-        return redirect('/') 
+        return redirect('/')
     token = request.form.get('token')
     thread_pool.run_async(refresh_account, token, False)
     return redirect('/')
@@ -169,7 +169,7 @@ def refresh_ada():
 @login_required
 def refresh_force_ada():
     if request.method == 'GET':
-        return redirect('/') 
+        return redirect('/')
     token = request.form.get('token')
     thread_pool.run_async(refresh_account, token, True)
     return redirect('/')
@@ -220,6 +220,8 @@ def robots():
 def statistics():
     accs_info = get_user_accs()
     statistics_info = cache.get('statistics')
+    if not statistics_info:
+        return redirect(url_for('loading'))
     return render_template('statistics.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
@@ -230,8 +232,10 @@ def statistics_pool():
         return redirect('/')
     pool = request.form.get('pool')
     accs_info = get_user_accs()
-    
+
     statistics_info = cache.get('statistics_pool_{}'.format(pool))
+    if not statistics_info:
+        return redirect(url_for('loading'))
     return render_template('statistics_pool.html', accounts=accs_info, user=current_user, info=statistics_info)
 
 
@@ -306,6 +310,8 @@ def user_settings_modify():
 def lucky_rank():
     accs_info = get_user_accs()
     lucky_info = cache.get('luckyrank')
+    if not lucky_info:
+        return redirect(url_for('loading'))
     return render_template('lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
 
@@ -314,6 +320,8 @@ def lucky_rank():
 def old_lucky_rank():
     accs_info = get_user_accs()
     lucky_info = cache.get('old_luckyrank')
+    if not lucky_info:
+        return redirect(url_for('loading'))
     return render_template('old_lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
 
@@ -321,7 +329,7 @@ def old_lucky_rank():
 @login_required
 def diamond_record():
     if request.method == 'GET':
-        return redirect('/') 
+        return redirect('/')
     token = request.form.get('token')
 
     accs_info = get_user_accs()
@@ -347,7 +355,7 @@ def disclaimers():
             if session.get('not_disclaimers'):
                 session.pop('not_disclaimers')
             return redirect(url_for('index'))
-            
+
     if not current_user.accept_disclaimers:
         session['not_disclaimers'] = True
 
@@ -359,7 +367,16 @@ def disclaimers():
 def uprank():
     accs_info = get_user_accs()
     no_up_info = cache.get('no_up_rank')
+    if not no_up_info:
+        return redirect(url_for('loading'))
     return render_template('not_up_rank.html', accounts=accs_info, user=current_user, info=no_up_info)
+
+
+@app.route('/loading', methods=['GET', 'POST'])
+@login_required
+def loading():
+    accs_info = get_user_accs()
+    return render_template('loading.html', accounts=accs_info, user=current_user)
 
 
 @app.route('/test')
@@ -370,7 +387,7 @@ def test():
 def get_user_accs():
     user = User(current_user)
     accs_info = cache.get('user_accs_{}'.format(user.username))
-    
+
     if not accs_info:
         accs_token = user.get_accs_token()
         accs_info = []
@@ -410,25 +427,25 @@ def has_bad_char(info):
 def update_luckyrank(flask_cache):
     pool = ada_config().config.get('data').get('luckyrank_pool')
     lucky_info = api.data.get_new_lucky_rank(pool)
-    flask_cache.set('luckyrank', lucky_info, timeout=3800)
+    flask_cache.set('luckyrank', lucky_info, timeout=4200)
 
 
 def update_old_luckyrank(flask_cache):
     lucky_info = api.data.get_lucky_rank()
-    flask_cache.set('old_luckyrank', lucky_info, timeout=3800)
+    flask_cache.set('old_luckyrank', lucky_info, timeout=4200)
 
 
 def update_statistics(flask_cache):
     statistics_info = api.data.get_statistics()
-    flask_cache.set('statistics', statistics_info, timeout=3800)
+    flask_cache.set('statistics', statistics_info, timeout=4200)
     for pool in api.data.get_all_pool():
         statistics_pool_info = api.data.get_pool_statistics(pool)
-        flask_cache.set('statistics_pool_{}'.format(pool), statistics_pool_info, timeout=3800)
+        flask_cache.set('statistics_pool_{}'.format(pool), statistics_pool_info, timeout=4200)
 
 
 def update_uprank(flask_cache):
     no_up_info = api.data.get_not_up_rank()
-    flask_cache.set('no_up_rank', no_up_info, timeout=3800)
+    flask_cache.set('no_up_rank', no_up_info, timeout=4200)
 
 
 def refresh_account(token, force):
@@ -449,8 +466,8 @@ if __name__ == '__main__':
 
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not debug:
         thread_pool.register_async_timer(update_old_luckyrank, 3600, cache)
-        thread_pool.register_async_timer(update_luckyrank, 3600, cache)
-        thread_pool.register_async_timer(update_statistics, 3600, cache)
+        thread_pool.register_async_timer(update_luckyrank, 3700, cache)
+        thread_pool.register_async_timer(update_statistics, 3800, cache)
         thread_pool.register_async_timer(api.data.recalculate_pool_up, 86400)
-        thread_pool.register_async_timer(update_uprank, 3600, cache)
+        thread_pool.register_async_timer(update_uprank, 3900, cache)
     app.run(debug=debug, port=port, host=host)

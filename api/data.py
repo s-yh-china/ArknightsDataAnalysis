@@ -90,7 +90,7 @@ def get_new_lucky_rank(pool_name):
         return empty_info
 
     for account in Account.select():
-        if account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
+        if account.available and account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
             enable_accounts.append(account)
             osr_lucky[account] = {
                 'six': 0,
@@ -461,7 +461,7 @@ def get_not_up_rank():
     }
 
     for account in Account.select():
-        if account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
+        if account.available and account.owner is not None and UserSettings.get_settings(account.owner).is_lucky_rank:
             enable_accounts.append(account)
             osr_not_up[account] = {
                 'six': 0,
@@ -503,7 +503,7 @@ def get_not_up_rank():
 
         osr_not_up_name[osr_account] = osr_account_name
 
-        if osr_not_up[osr_account]['six'] > 1:
+        if osr_not_up[osr_account]['six'] > 2:
             osr_not_up_avg[osr_account] = osr_not_up[osr_account]['not_up'] / osr_not_up[osr_account]['six']
 
     osr_not_up_rank = []
@@ -903,7 +903,8 @@ class ada_data:
 
         osr_not_up_avg = {}
         for osr_not_up_pool in osr_not_up:
-            osr_not_up_avg[osr_not_up_pool] = osr_not_up[osr_not_up_pool] / osr_six[osr_not_up_pool]
+            if osr_six[osr_not_up_pool] > 0:
+                osr_not_up_avg[osr_not_up_pool] = osr_not_up[osr_not_up_pool] / osr_six[osr_not_up_pool]
 
         osr_info = {
             'osr_lucky_avg': osr_lucky_avg,
