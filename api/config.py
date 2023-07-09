@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-import os, json
+import json
+import os
 
-class ada_config():
-    version = 'v2.4.1'
-    database_version = 'v1.2.0'
+
+class ada_config:
+    version = 'v3.0.0'
+    database_version = 'v2.0.0'
     config = {
         "version": "{}".format(version),
-        "force_refresh": {
-            "enabled": 0
-        },
         "database": {
             "type": "sqlite3",
             "sqlite3": {
@@ -28,30 +27,8 @@ class ada_config():
             "debug": True,
             "hostname": "",
         },
-        "accounts": [
-            {
-                "name": "",
-                "token": ""
-            }
-        ],
-        "push": {
-            "enabled": 1,
-            "type": "bark",
-            "push_when_changed": {
-                "enabled": 1
-            },
-            "bark": {
-                "url": "",
-                "device_key": "",
-                "title": "Arnights 寻访记录",
-                "group": "Arknights",
-                "badge": 1,
-                "isArchive": 1 
-            },
-            "serverchan": {
-                "send_key": "",
-                "title": "Arnights 寻访记录"
-            }
+        "data": {
+            "luckyrank_pool": "标准寻访"
         }
     }
 
@@ -90,6 +67,15 @@ class ada_config():
         if local_config.get('version') == 'v2.4.0':
             local_config['web']['hostname'] = ''
             local_config['version'] = 'v2.4.1'
+        if local_config.get('version') == 'v2.4.1':
+            del local_config['push']
+            del local_config['accounts']
+            del local_config['force_refresh']
+            data = {
+                "luckyrank_pool": "标准寻访"
+            }
+            local_config['data'] = data
+            local_config['version'] = 'v3.0.0'
         self.config = local_config
         self.update_config()
 
@@ -98,7 +84,7 @@ class ada_config():
             local_config = json.load(json_file)
         if not local_config.get('version') == self.version:
             self.update_config_version(local_config)
-    
+
     def load_config(self):
         with open(self.config_file, encoding='utf-8') as json_file:
             self.config = json.load(json_file)
@@ -117,30 +103,3 @@ class ada_config():
             exit("ERROR: DATABASE_TYPE must be in {}".format(database_type_list))
         type_config = database_config.get(database_type)
         return database_type, type_config, database_config.get('database_version', 'v0.0.0')
-    
-    def load_config_push(self):
-        self.load_config()
-        push_config = self.config.get('push')
-        push_enabled = push_config.get('enabled')
-        if push_enabled == 0:
-            return None, None
-        push_type = push_config.get('type')
-        type_config = push_config.get(push_type)
-        return push_type, type_config
-
-    def load_config_push_when_changed(self):
-        self.load_config()
-        push_config = self.config.get('push')
-        push_enabled = self.config.get('push').get('enabled')
-        if push_enabled == 0:
-            return 0
-        push_when_changed_config = push_config.get('push_when_changed')
-        push_when_changed_enabled = push_when_changed_config.get('enabled')
-        return push_when_changed_enabled
-    
-    def load_config_force_refresh(self):
-        self.load_config()
-        force_refresh_enabled = self.config.get('force_refresh').get('enabled')
-        if force_refresh_enabled == 0:
-            return False
-        return True

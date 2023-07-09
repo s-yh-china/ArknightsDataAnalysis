@@ -26,5 +26,5 @@ for account in Account.select():
         print(failMes)
         errorlog.write(datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ') + failMes + '\n')
 
-print('data sync compelet')
+print('data sync complete')
 errorlog.close()

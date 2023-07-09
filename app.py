@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, url_for, session
 from flask import render_template, send_from_directory
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from flask_caching import Cache
+import traceback
 
 
 import api.data
@@ -308,6 +309,14 @@ def lucky_rank():
     return render_template('lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
 
 
+@app.route('/luckyrank/old', methods=['GET', 'POST'])
+@login_required
+def old_lucky_rank():
+    accs_info = get_user_accs()
+    lucky_info = cache.get('old_luckyrank')
+    return render_template('old_lucky_rank.html', accounts=accs_info, user=current_user, info=lucky_info)
+
+
 @app.route('/diamond', methods=['POST', 'GET'])
 @login_required
 def diamond_record():
@@ -321,7 +330,7 @@ def diamond_record():
     return render_template('diamond.html', info=a_info, accounts=accs_info, user=current_user)
 
 
-@app.route('/author', methods=['GET'])
+@app.route('/author', methods=['GET', 'POST'])
 @login_required
 def author_page():
     accs_info = get_user_accs()
@@ -343,6 +352,14 @@ def disclaimers():
         session['not_disclaimers'] = True
 
     return render_template('disclaimers.html', user=current_user)
+
+
+@app.route('/uprank', methods=['GET', 'POST'])
+@login_required
+def uprank():
+    accs_info = get_user_accs()
+    no_up_info = cache.get('no_up_rank')
+    return render_template('not_up_rank.html', accounts=accs_info, user=current_user, info=no_up_info)
 
 
 @app.route('/test')
@@ -391,16 +408,27 @@ def has_bad_char(info):
 
 
 def update_luckyrank(flask_cache):
+    pool = ada_config().config.get('data').get('luckyrank_pool')
+    lucky_info = api.data.get_new_lucky_rank(pool)
+    flask_cache.set('luckyrank', lucky_info, timeout=3800)
+
+
+def update_old_luckyrank(flask_cache):
     lucky_info = api.data.get_lucky_rank()
-    flask_cache.set('luckyrank', lucky_info, timeout=3700)
+    flask_cache.set('old_luckyrank', lucky_info, timeout=3800)
 
 
-def update_statistics(flask_cahce):
+def update_statistics(flask_cache):
     statistics_info = api.data.get_statistics()
-    flask_cahce.set('statistics', statistics_info, timeout=3700)
+    flask_cache.set('statistics', statistics_info, timeout=3800)
     for pool in api.data.get_all_pool():
         statistics_pool_info = api.data.get_pool_statistics(pool)
-        flask_cahce.set('statistics_pool_{}'.format(pool), statistics_pool_info, timeout=3700)
+        flask_cache.set('statistics_pool_{}'.format(pool), statistics_pool_info, timeout=3800)
+
+
+def update_uprank(flask_cache):
+    no_up_info = api.data.get_not_up_rank()
+    flask_cache.set('no_up_rank', no_up_info, timeout=3800)
 
 
 def refresh_account(token, force):
@@ -419,6 +447,10 @@ if __name__ == '__main__':
         file = open('templates/activity.html', 'w')
         file.close()
 
-    thread_pool.register_async_timer(update_luckyrank, 3600, cache)
-    thread_pool.register_async_timer(update_statistics, 3600, cache)
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not debug:
+        thread_pool.register_async_timer(update_old_luckyrank, 3600, cache)
+        thread_pool.register_async_timer(update_luckyrank, 3600, cache)
+        thread_pool.register_async_timer(update_statistics, 3600, cache)
+        thread_pool.register_async_timer(api.data.recalculate_pool_up, 86400)
+        thread_pool.register_async_timer(update_uprank, 3600, cache)
     app.run(debug=debug, port=port, host=host)

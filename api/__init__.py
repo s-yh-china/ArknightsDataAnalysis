@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from .config import *
 from .data import *
-from .push import *
 from .user import *
 from .model import DBUser
 

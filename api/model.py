@@ -19,13 +19,13 @@ class DBUser(BaseModel):
 
     def is_authenticated(self):
         return self.authenticated
-    
+
     def is_active(self):
         return True
-    
+
     def get_id(self):
         return self.id
-    
+
     def is_anonymous(self):
         return False
 
@@ -56,6 +56,7 @@ class OSROperator(BaseModel):
     is_new = BooleanField()
     index = IntegerField()
     record = ForeignKeyField(OperatorSearchRecord, backref='operators')
+    up = BooleanField(default=False)
 
 
 class PayRecord(BaseModel):
@@ -88,7 +89,7 @@ class UserSettings(BaseModel):
     def get_settings(user):
         return UserSettings.get_or_create(user=user, defaults={'nickname': user.username})[0]
 
-        
+
 class DiamondRecord(BaseModel):
     account = ForeignKeyField(Account, backref='diamond_records')
     operation = CharField()
@@ -105,26 +106,36 @@ class GiftRecord(BaseModel):
     name = CharField()
 
 
-def update_database_version(a_config, database_version, mgrt):
-    if database_version == 'v0.0.0':
-        database_version = 'v1.0.0'
+class OSRPoolUp(BaseModel):
+    pool = ForeignKeyField(OSRPool, backref='ups')
+    name = CharField()
+
+
+def update_database_version(config, version, mgrt):
+    if version == 'v0.0.0':
+        version = 'v1.0.0'
         migrate(
             mgrt.add_column(table='DBUser', column_name='accept_disclaimers', field=BooleanField(default=False)),
         )
-    if database_version == 'v1.0.0':
-        database_version = 'v1.1.0'
+    if version == 'v1.0.0':
+        version = 'v1.1.0'
         migrate(
             mgrt.add_column(table='UserSettings', column_name='is_auto_gift', field=BooleanField(default=False)),
         )
-    if database_version == 'v1.1.0':
-        database_version = 'v1.2.0'
+    if version == 'v1.1.0':
+        version = 'v1.2.0'
         migrate(
             mgrt.add_column(table='Account', column_name='available', field=BooleanField(default=True))
         )
-    a_config.config['database']['database_version'] = database_version
-    a_config.update_config()
+    if version == 'v1.2.0':
+        version = 'v2.0.0'
+        migrate(
+            mgrt.add_column(table='OSROperator', column_name='up', field=BooleanField(default=False))
+        )
+    config.config['database']['database_version'] = version
+    config.update_config()
 
-    
+
 a_config = ada_config()
 database_type, database_type_config, database_version = a_config.load_config_database()
 if database_type == 'sqlite3':
@@ -138,9 +149,12 @@ if database_type == 'mysql':
     db_name = database_type_config.get('database')
     db = MySQLDatabase(db_name, host=db_host, user=db_user, passwd=db_pass, port=3306)
     mgrt = MySQLMigrator(db)
-    
+
 if database_version != a_config.database_version:
     update_database_version(a_config, database_version, mgrt)
 
 database_proxy.initialize(db)
-database_proxy.create_tables([DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings, DiamondRecord, GiftRecord])
+database_proxy.create_tables(
+    [DBUser, Account, OSRPool, OperatorSearchRecord, OSROperator, PayRecord, UserSettings, DiamondRecord, GiftRecord,
+     OSRPoolUp]
+)
