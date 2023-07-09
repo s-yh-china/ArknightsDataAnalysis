@@ -541,8 +541,8 @@ def get_not_up_rank():
             'start_time': str(records[0].time),
             'end_time': str(records[len(records) - 1].time)
         },
-        'up': osr_up_rank,
-        'not_up': osr_not_up_rank
+        'not_up': osr_up_rank,
+        'up': osr_not_up_rank
     }
     return info
 
