@@ -6,6 +6,8 @@ from .model import *
 import random
 
 
+pool_not_up = ['【联合行动】特选干员定向寻访', '常驻标准寻访', '联合行动', '跨年欢庆·相逢', '定制寻访', '未知寻访', '中坚寻访', '中坚甄选']
+
 def f_hide_mid(info, count=4, fix='*'):
     """
        #隐藏/脱敏 中间几位
@@ -473,6 +475,8 @@ def get_not_up_rank():
         return empty_info
 
     for record in records:
+        if record.pool.name in pool_not_up:
+            continue
         operators = record.operators
         account = record.account
         for operator in operators:
@@ -747,26 +751,6 @@ class ada_data:
                         }
                     )
 
-    def fetch_osr_from_local(self):
-        with open('local.json', encoding='utf-8') as json_file:
-            local_osr = json.load(json_file)
-        for ts in local_osr:
-            time = datetime.datetime.fromtimestamp(int(ts))
-            pool = local_osr[ts]['p']
-            pool_type = '常规卡池'
-            if pool in self.not_standard_pool:
-                pool_type = pool
-            osr_pool = OSRPool.get_or_create(name=pool, defaults={'type': pool_type})[0]
-            osr = OperatorSearchRecord.create(account=self.account, time=time, pool=osr_pool)
-            chars = local_osr[ts]['c']
-            t_index = 0
-            for chars_item in chars:
-                name = chars_item[0]
-                rarity = chars_item[1] + 1
-                is_new = bool(chars_item[2])
-                OSROperator.create(name=name, rarity=rarity, is_new=is_new, index=t_index, record=osr)
-                t_index += 1
-
     def fetch_pay_record(self):
         payload = None
         if self.account.channel == '1':
@@ -862,10 +846,11 @@ class ada_data:
                 }
             if pool not in osr_pool:
                 osr_pool.append(pool)
-            if pool not in osr_not_up:
-                osr_not_up[pool] = 0
-            if pool not in osr_six:
-                osr_six[pool] = 0
+            if pool not in pool_not_up:
+                if pool not in osr_not_up:
+                    osr_not_up[pool] = 0
+                if pool not in osr_six:
+                    osr_six[pool] = 0
         for record in records:
             pool_type = record.pool.type
             pool_name = record.pool.name
@@ -887,12 +872,13 @@ class ada_data:
                 osr_lucky[pool_type][str(rarity)].append(osr_lucky[pool_type]['count'][str(rarity)])
                 osr_lucky[pool_type]['count'][str(rarity)] = 0
 
-                if rarity == 6:
-                    osr_six[pool_name] += 1
-                    osr_six['total'] += 1
-                    if not operator.up:
-                        osr_not_up[pool_name] += 1
-                        osr_not_up['total'] += 1
+                if pool_name not in pool_not_up:
+                    if rarity == 6:
+                        osr_six[pool_name] += 1
+                        osr_six['total'] += 1
+                        if not operator.up:
+                            osr_not_up[pool_name] += 1
+                            osr_not_up['total'] += 1
 
         osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
         osr_lucky_count = {}
