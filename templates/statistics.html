@@ -5,158 +5,182 @@
 {% endblock %}
 
 {% block main %}
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">全站抽卡统计</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-      <div class="btn-group me-2" style="margin: 0 8px;">
-        <a href="{{ url_for('index') }}">
-            <button type="text" class="btn btn-sm btn-outline-secondary">Index</button>
-        </a>
-      </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">全站抽卡统计</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2" style="margin: 0 8px;">
+                <a href="{{ url_for('index') }}">
+                    <button type="text" class="btn btn-sm btn-outline-secondary">Index</button>
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <h2>抽卡数据总览</h2>
-  <a>{{ info.time.start_time }} - {{ info.time.end_time }}</a>
-  <div class="table-responsive">
-    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
-      <thead>
-        <tr>
-          <th scope="col">总计</th>
-          <th scope="col">{{ info.osr_number.total.all }} 抽</th>
-          <th scope="col">占比</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>六星</td>
-          <td>{{ info.osr_number.total['6'] }} 抽</td>
-          <td>{{ "%.2f" | format(info.osr_number.total['6'] / info.osr_number.total.all * 100) }} %</td>
-        </tr>
-        <tr>
-          <td>五星</td>
-          <td>{{ info.osr_number.total['5'] }} 抽</td>
-          <td>{{ "%.2f" | format(info.osr_number.total['5'] / info.osr_number.total.all * 100) }} %</td>
-        </tr>
-        <tr>
-          <td>四星</td>
-          <td>{{ info.osr_number.total['4'] }} 抽</td>
-          <td>{{ "%.2f" | format(info.osr_number.total['4'] / info.osr_number.total.all * 100) }} %</td>
-        </tr>
-        <tr>
-          <td>三星</td>
-          <td>{{ info.osr_number.total['3'] }} 抽</td>
-          <td>{{ "%.2f" | format(info.osr_number.total['3'] / info.osr_number.total.all * 100) }} %</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>平均出货次数</h3>
-  <div class="table-responsive">
-    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
-      <thead>
-        <tr>
-          <th scope="col">干员</th>
-          <th scope="col">抽数</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>六星</td>
-          <td>{{ "%.2f" | format(info.osr_lucky_avg['6']) }} 抽</td>
-        </tr>
-        <tr>
-          <td>五星</td>
-          <td>{{ "%.2f" | format(info.osr_lucky_avg['5']) }} 抽</td>
-        </tr>
-        <tr>
-          <td>四星</td>
-          <td>{{ "%.2f" | format(info.osr_lucky_avg['4']) }} 抽</td>
-        </tr>
-        <tr>
-          <td>三星</td>
-          <td>{{ "%.2f" | format(info.osr_lucky_avg['3']) }} 抽</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>各卡池抽卡次数</h3>
-  <div class="table-responsive">
-    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
-      <thead>
-        <tr>
-          <th scope="col">卡池</th>
-          <th scope="col">抽数</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for key, value in info.osr_number.items() %}
-          {% if key != 'total' %}
+    <h2>抽卡数据总览</h2>
+    <a>{{ info.time.start_time }} - {{ info.time.end_time }}</a>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+            <thead>
             <tr>
-              <td>{{ key }}</td>
-              <td>{{ value }} 抽</td>
+                <th scope="col">总计</th>
+                <th scope="col">{{ info.osr_number.total.all }} 抽</th>
+                <th scope="col">占比</th>
             </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <h3>每月抽卡次数</h3>
-  <div class="table-responsive">
-    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
-      <thead>
-        <tr>
-          <th scope="col">日期</th>
-          <th scope="col">抽数</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for key, value in info.osr_number_month.items() %}
-          {% if key != 'total' %}
+            </thead>
+            <tbody>
             <tr>
-              <td>{{ key }}</td>
-              <td>{{ value }} 抽</td>
+                <td>六星</td>
+                <td>{{ info.osr_number.total['6'] }} 抽</td>
+                <td>{{ "%.2f" | format(info.osr_number.total['6'] / info.osr_number.total.all * 100) }} %</td>
             </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <h2>卡池检索</h2>
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottomaccounts">
-    <div class="btn-toolbar mb-2 mb-md-0">
-      <div class="btn-group me-2">
-        {% for pool in info.osr_pool %}
-        <form class="form-inline" style="display: none" role="form" id="{{ pool }}" action="/statistics/pool" method="post">
-          <div class="form-group">
-              <input type="text" class="form-control" id="pool" name="pool" value={{ pool }}>
-          </div>
-        </form>
-        <button type="submit" form="{{ pool }}" class="btn btn-sm btn-outline-secondary">{{ pool }}</button>
-        {% endfor %}
-      </div>
+            <tr>
+                <td>五星</td>
+                <td>{{ info.osr_number.total['5'] }} 抽</td>
+                <td>{{ "%.2f" | format(info.osr_number.total['5'] / info.osr_number.total.all * 100) }} %</td>
+            </tr>
+            <tr>
+                <td>四星</td>
+                <td>{{ info.osr_number.total['4'] }} 抽</td>
+                <td>{{ "%.2f" | format(info.osr_number.total['4'] / info.osr_number.total.all * 100) }} %</td>
+            </tr>
+            <tr>
+                <td>三星</td>
+                <td>{{ info.osr_number.total['3'] }} 抽</td>
+                <td>{{ "%.2f" | format(info.osr_number.total['3'] / info.osr_number.total.all * 100) }} %</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
-  </div>
 
-  <h2>充值总计</h2>
-  <div class="table-responsive">
-    <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
-      <thead>
-        <tr>
-          <th scope="col">名称</th>
-          <th scope="col">金额</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>合计</td>
-          <td>￥{{ info.pay_total_money }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <h3>平均出货次数</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+            <thead>
+            <tr>
+                <th scope="col">干员</th>
+                <th scope="col">抽数</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>六星</td>
+                <td>{{ "%.2f" | format(info.osr_lucky_avg['6']) }} 抽</td>
+            </tr>
+            <tr>
+                <td>五星</td>
+                <td>{{ "%.2f" | format(info.osr_lucky_avg['5']) }} 抽</td>
+            </tr>
+            <tr>
+                <td>四星</td>
+                <td>{{ "%.2f" | format(info.osr_lucky_avg['4']) }} 抽</td>
+            </tr>
+            <tr>
+                <td>三星</td>
+                <td>{{ "%.2f" | format(info.osr_lucky_avg['3']) }} 抽</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>各卡池抽卡次数</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+            <thead>
+            <tr>
+                <th scope="col">卡池</th>
+                <th scope="col">抽数</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, value in info.osr_number.items() %}
+                {% if key != 'total' %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }} 抽</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3>歪卡率</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+            <thead>
+            <tr>
+                <th scope="col">总歪卡率</th>
+                <th scope="col">{{ "%.2f" | format(info.osr_not_up_avg['total'] * 100) }} %</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, value in info.osr_not_up_avg.items() %}
+                {% if key != 'total' %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ "%.2f" | format(value * 100) }} %</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3>每月抽卡次数</h3>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+            <thead>
+            <tr>
+                <th scope="col">日期</th>
+                <th scope="col">抽数</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, value in info.osr_number_month.items() %}
+                {% if key != 'total' %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }} 抽</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2>卡池检索</h2>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottomaccounts"
+         style="flex-flow: row wrap">
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                {% for pool in info.osr_pool %}
+                    <form class="form-inline" style="display: none" role="form" id="{{ pool }}"
+                          action="/statistics/pool" method="post">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="pool" name="pool" value={{ pool }}>
+                        </div>
+                    </form>
+                    <button type="submit" form="{{ pool }}" class="btn btn-sm btn-outline-secondary">{{ pool }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <h2>充值总计</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="border-collapse: collapse; table-layout: fixed;">
+            <thead>
+            <tr>
+                <th scope="col">名称</th>
+                <th scope="col">金额</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>合计</td>
+                <td>￥{{ info.pay_total_money }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

@@ -286,6 +286,12 @@ def get_statistics():
         '6': 0, '5': 0, '4': 0, '3': 0,
         'count': {'6': 0, '5': 0, '4': 0, '3': 0}
     }
+    osr_not_up = {
+        'total': 0
+    }
+    osr_six = {
+        'total': 0
+    }
     osr_number_month = {}
     osr_pool = []
 
@@ -299,6 +305,9 @@ def get_statistics():
         if pool not in osr_pool:
             osr_number[pool] = 0
             osr_pool.append(pool)
+            if pool not in pool_not_up:
+                osr_not_up[pool] = 0
+                osr_six[pool] = 0
 
     for record in records:
         a_user = record.account.owner
@@ -325,6 +334,13 @@ def get_statistics():
                 osr_lucky['count'][str(r)] += 1
             osr_lucky[str(rarity)] += 1
 
+            if pool not in pool_not_up and operator.rarity == 6:
+                osr_six['total'] += 1
+                osr_six[pool] += 1
+                if not operator.up:
+                    osr_not_up['total'] += 1
+                    osr_not_up[pool] += 1
+
     osr_lucky_avg = {'6': [], '5': [], '4': [], '3': []}
 
     for r in range(3, 7):
@@ -332,6 +348,11 @@ def get_statistics():
             osr_lucky_avg[str(r)] = 0
         else:
             osr_lucky_avg[str(r)] = osr_lucky['count'][str(r)] / osr_lucky[str(r)]
+
+    osr_not_up_avg = {}
+    for osr_not_up_pool in osr_not_up:
+        if osr_not_up[osr_not_up_pool] > 0:
+            osr_not_up_avg[osr_not_up_pool] = osr_not_up[osr_not_up_pool] / osr_six[osr_not_up_pool]
 
     osr_number_month_sorted = {}
     for item in sorted(osr_number_month.keys(), reverse=True):
@@ -344,6 +365,7 @@ def get_statistics():
         },
         'osr_number': osr_number,
         'osr_lucky_avg': osr_lucky_avg,
+        'osr_not_up_avg': osr_not_up_avg,
         'pay_total_money': pay_total_money,
         'osr_number_month': osr_number_month_sorted,
         'osr_pool': osr_pool,
