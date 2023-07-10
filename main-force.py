@@ -14,6 +14,8 @@ for account in Account.select():
         if UserSettings.get_settings(account.owner).is_auto_gift:
             a_api.auto_get_gift()
             print('{}(uid:{}) gift get succees'.format(a_info.get('nickName'), a_info.get('uid')))
+        account.available = True
+        account.save()
         print('{}(uid:{}) sync succees'.format(a_info.get('nickName'), a_info.get('uid')))
     except:
         a_user = account.owner
