@@ -15,7 +15,6 @@ class ada_api():
         self.a_data = ada_data(token)
         if not only_read:
             self.a_data.fetch_data(force_refresh)
-            self.a_push = ada_push()
         else:
             self.a_data.fetch_account_info()
         self.account = self.a_data.account
