@@ -6,7 +6,7 @@ from .model import *
 import random
 
 
-pool_not_up = ['【联合行动】特选干员定向寻访', '常驻标准寻访', '联合行动', '跨年欢庆·相逢', '定制寻访', '未知寻访', '中坚寻访', '中坚甄选']
+pool_not_up = ['【联合行动】特选干员定向寻访', '常驻标准寻访', '联合行动', '跨年欢庆·相逢', '定制寻访', '未知寻访', '中坚寻访', '中坚甄选', '前路回响']
 
 def f_hide_mid(info, count=4, fix='*'):
     """
@@ -905,6 +905,8 @@ class ada_data:
         for osr_not_up_pool in osr_not_up:
             if osr_six[osr_not_up_pool] > 0:
                 osr_not_up_avg[osr_not_up_pool] = osr_not_up[osr_not_up_pool] / osr_six[osr_not_up_pool]
+        if len(osr_not_up_avg) == 0:
+            osr_not_up_avg['total'] = 0
 
         osr_info = {
             'osr_lucky_avg': osr_lucky_avg,
