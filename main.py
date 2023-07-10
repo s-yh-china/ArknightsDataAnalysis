@@ -8,6 +8,8 @@ print('data sync start')
 
 for account in Account.select():
     token = account.token
+    if not account.available:
+        continue
     try:
         a_api = ada_api(token, force_refresh=False)
         a_info = a_api.get_account_info()
