@@ -606,7 +606,7 @@ class ada_data:
     url_gift_get = 'https://ak.hypergryph.com/user/api/gift/exchange'
     not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '定制寻访', '未知寻访']
 
-    gift_codes = ['2023SPECIALCANDY']
+    gift_codes = ['2023SPECIALCANDY', '00SUMMERCARNIVAL']
 
     def __init__(self, token):
         self.token = token_format(token)
