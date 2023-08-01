@@ -468,6 +468,6 @@ if __name__ == '__main__':
         thread_pool.register_async_timer(update_old_luckyrank, 3600, cache)
         thread_pool.register_async_timer(update_luckyrank, 3700, cache)
         thread_pool.register_async_timer(update_statistics, 3800, cache)
-        thread_pool.register_async_timer(api.data.recalculate_pool_up, 86400)
+        thread_pool.register_async_timer(api.data.recalculate_pool_up, 3600)
         thread_pool.register_async_timer(update_uprank, 3900, cache)
     app.run(debug=debug, port=port, host=host)
