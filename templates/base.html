@@ -1,71 +1,96 @@
 <!doctype html>
 <html lang="zh-cn">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
     <title>Arknights Data Analysis</title>
-  </head>
-  <body>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js" integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+</head>
+<body>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+        integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
     <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3">{% block uid %}{% endblock %}</a>
-    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+            aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <a class="navbar-brand col-md-3 col-lg-2 me-0 px-5" href="/">Arknights Data Analysis</a>
     <div class="navbar-nav">
-      <div class="nav-item text-nowrap">
-        {% block cur_user %}{% endblock %}
-        <a class="nav-link px-3" href="{{ url_for('author_page') }}" style="display: inline-block;">Authors</a>
-      </div>
+        <div class="nav-item text-nowrap">
+            {% block cur_user %}{% endblock %}
+            <a class="nav-link px-3" href="{{ url_for('author_page') }}" style="display: inline-block;">Authors</a>
+        </div>
     </div>
-    </header>
-    <div class="container-fluid">
-      <div class="row">
+</header>
+<div class="container-fluid">
+    <div class="row">
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-          <div class="position-sticky pt-3">
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1">
-              <span>Arknights Accounts</span>
-              <a class="link-secondary" href="/">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-              </a>
-            </h6>
-            {% block accounts %}
-            <ul class="nav flex-column mb-2">
-              {% for acc in accounts %}
-                <li class="nav-item">
-                  {% if acc.tokenAlive %}
-                  <form class="form-inline" style="display: none" role="form" id="accform{{ acc.token }}" action="/analyze" method="post">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="token" name="token" value={{ acc.token }}>
-                    </div>
-                  </form>
-                  <button type="submit" form="accform{{ acc.token }}" class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><img src="{{ url_for('static',filename='image/user.jpeg') }}" width="20" height="20"/></svg>
-                    <font color='black'>{{ acc.nickName }}</font>
-                  </button>
-                  {% else %}
-                  <button type="button" class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" aria-hidden="true"><img src="{{ url_for('static',filename='image/user.jpeg') }}" width="20" height="20"/></svg>
-                    <font color='red'>失效账号</font>
-                  </button>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-            {% endblock %}
-          </div>
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1">
+                    <span>Arknights Accounts</span>
+                    <a class="link-secondary" href="/">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="feather feather-plus-circle" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </a>
+                </h6>
+                {% block accounts %}
+                    <ul class="nav flex-column mb-2">
+                        {% for acc in accounts %}
+                            <li class="nav-item">
+                                {% if acc.tokenAlive %}
+                                    <form class="form-inline" style="display: none" role="form"
+                                          id="accform{{ acc.token }}" action="/analyze" method="post">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="token" name="token"
+                                                   value={{ acc.token }}>
+                                        </div>
+                                    </form>
+                                    <button type="submit" form="accform{{ acc.token }}"
+                                            class="nav-link btn btn-sm btn-outline-secondary" style="border:none">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black"
+                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                             class="feather feather-file-text" aria-hidden="true"><img
+                                                src="{{ url_for('static',filename='image/user.jpeg') }}" width="20"
+                                                height="20"/></svg>
+                                        <font color='black'>{{ acc.nickName }}</font>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="nav-link btn btn-sm btn-outline-secondary"
+                                            style="border:none">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black"
+                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                             class="feather feather-file-text" aria-hidden="true"><img
+                                                src="{{ url_for('static',filename='image/user.jpeg') }}" width="20"
+                                                height="20"/></svg>
+                                        <font color='red'>失效账号</font>
+                                    </button>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endblock %}
+            </div>
         </nav>
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             {% block main %}
             {% endblock %}
         </main>
 
-      </div>
     </div>
+</div>
 
-  </body>
+</body>
 </html>

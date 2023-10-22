@@ -8,6 +8,7 @@ import random
 
 pool_not_up = ['【联合行动】特选干员定向寻访', '常驻标准寻访', '联合行动', '跨年欢庆·相逢', '定制寻访', '未知寻访', '中坚寻访', '中坚甄选', '前路回响']
 
+
 def f_hide_mid(info, count=4, fix='*'):
     """
        #隐藏/脱敏 中间几位
@@ -70,6 +71,24 @@ def get_all_pool():
     return osr_pool
 
 
+def get_hided_user_name(osr_account):
+    osr_user_settings = UserSettings.get_settings(osr_account.owner)
+
+    if osr_user_settings.is_display_name:
+        if osr_user_settings.is_display_full:
+            osr_account_name = osr_account.nickname
+        else:
+            osr_account_name = f_hide_mid(osr_account.nickname, count=7)
+    else:
+        uid_len = len(osr_account.uid) - 1
+        osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uid_len - 1: uid_len]))
+
+    if osr_user_settings.is_display_nick:
+        osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
+
+    return osr_account_name
+
+
 def get_new_lucky_rank(pool_name):
     osr_lucky = {}
     enable_accounts = []
@@ -114,21 +133,7 @@ def get_new_lucky_rank(pool_name):
     osr_lucky_avg = {}
     osr_lucky_name = {}
     for osr_account in osr_lucky:
-        osr_user_settings = UserSettings.get_settings(osr_account.owner)
-
-        if osr_user_settings.is_display_name:
-            if osr_user_settings.is_display_full:
-                osr_account_name = osr_account.nickname
-            else:
-                osr_account_name = f_hide_mid(osr_account.nickname, count=7)
-        else:
-            uidlen = len(osr_account.uid) - 1
-            osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uidlen - 2: uidlen]))
-        if osr_user_settings.is_display_nick:
-            osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
-
-        osr_lucky_name[osr_account] = osr_account_name
-
+        osr_lucky_name[osr_account] = get_hided_user_name(osr_account)
         if osr_lucky[osr_account]['six'] > 1:
             osr_lucky_avg[osr_account] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
 
@@ -202,21 +207,7 @@ def get_lucky_rank():
     osr_lucky_avg = {}
     osr_lucky_name = {}
     for osr_account in osr_lucky:
-        osr_user_settings = UserSettings.get_settings(osr_account.owner)
-
-        if osr_user_settings.is_display_name:
-            if osr_user_settings.is_display_full:
-                osr_account_name = osr_account.nickname
-            else:
-                osr_account_name = f_hide_mid(osr_account.nickname, count=7)
-        else:
-            uidlen = len(osr_account.uid) - 1
-            osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uidlen - 2: uidlen]))
-        if osr_user_settings.is_display_nick:
-            osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
-
-        osr_lucky_name[osr_account] = osr_account_name
-
+        osr_lucky_name[osr_account] = get_hided_user_name(osr_account)
         if osr_lucky[osr_account]['six'] > 0:
             osr_lucky_avg[osr_account] = osr_lucky[osr_account]['count'] / osr_lucky[osr_account]['six']
 
@@ -510,21 +501,7 @@ def get_not_up_rank():
     osr_not_up_avg = {}
     osr_not_up_name = {}
     for osr_account in osr_not_up:
-        osr_user_settings = UserSettings.get_settings(osr_account.owner)
-
-        if osr_user_settings.is_display_name:
-            if osr_user_settings.is_display_full:
-                osr_account_name = osr_account.nickname
-            else:
-                osr_account_name = f_hide_mid(osr_account.nickname, count=7)
-        else:
-            uidlen = len(osr_account.uid) - 1
-            osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uidlen - 2: uidlen]))
-        if osr_user_settings.is_display_nick:
-            osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())
-
-        osr_not_up_name[osr_account] = osr_account_name
-
+        osr_not_up_name[osr_account] = get_hided_user_name(osr_account)
         if osr_not_up[osr_account]['six'] > 2:
             osr_not_up_avg[osr_account] = osr_not_up[osr_account]['not_up'] / osr_not_up[osr_account]['six']
 
@@ -606,7 +583,7 @@ class ada_data:
     url_gift_get = 'https://ak.hypergryph.com/user/api/gift/exchange'
     not_standard_pool = ['浊酒澄心', '跨年欢庆·相逢', '定制寻访', '未知寻访']
 
-    gift_codes = ['2023SPECIALCANDY', '00SUMMERCARNIVAL']
+    gift_codes = ['2023SPECIALCANDY', '00SUMMERCARNIVAL', '02023CELEBRATION']
 
     def __init__(self, token):
         self.token = token_format(token)
