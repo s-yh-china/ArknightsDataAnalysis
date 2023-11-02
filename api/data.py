@@ -80,8 +80,7 @@ def get_hided_user_name(osr_account):
         else:
             osr_account_name = f_hide_mid(osr_account.nickname, count=7)
     else:
-        uid_len = len(osr_account.uid) - 1
-        osr_account_name = '已匿名{}'.format((osr_account.uid[0: 2] + osr_account.uid[uid_len - 1: uid_len]))
+        osr_account_name = '已匿名{}'.format((osr_account.uid[:2] + osr_account.uid[-2:]))
 
     if osr_user_settings.is_display_nick:
         osr_account_name += ' ({})'.format(osr_user_settings.get_nickname())

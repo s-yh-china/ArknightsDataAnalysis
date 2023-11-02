@@ -6,7 +6,6 @@ from flask_login import LoginManager, current_user, login_required, login_user, 
 from flask_caching import Cache
 import traceback
 
-
 import api.data
 from api.thread_pool import MyThreadPool
 from api import *
@@ -207,7 +206,8 @@ def analyze_pool_results():
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',
+                               mimetype='image/vnd.microsoft.icon')
 
 
 @app.route('/robots.txt')
