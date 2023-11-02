@@ -425,27 +425,35 @@ def has_bad_char(info):
 
 
 def update_luckyrank(flask_cache):
+    log('INFO', 'Start Update LuckyRank')
     pool = ada_config().config.get('data').get('luckyrank_pool')
     lucky_info = api.data.get_new_lucky_rank(pool)
     flask_cache.set('luckyrank', lucky_info, timeout=4200)
+    log('INFO', 'Final Update LuckyRank')
 
 
 def update_old_luckyrank(flask_cache):
+    log('INFO', 'Start Update LuckyRank-old')
     lucky_info = api.data.get_lucky_rank()
     flask_cache.set('old_luckyrank', lucky_info, timeout=4200)
+    log('INFO', 'Final Update LuckyRank-old')
 
 
 def update_statistics(flask_cache):
+    log('INFO', 'Start Update Statistics')
     statistics_info = api.data.get_statistics()
     flask_cache.set('statistics', statistics_info, timeout=4200)
     for pool in api.data.get_all_pool():
         statistics_pool_info = api.data.get_pool_statistics(pool)
         flask_cache.set('statistics_pool_{}'.format(pool), statistics_pool_info, timeout=4200)
+    log('INFO', 'Final Update Statistics')
 
 
 def update_uprank(flask_cache):
+    log('INFO', 'Start Update UPRank')
     no_up_info = api.data.get_not_up_rank()
     flask_cache.set('no_up_rank', no_up_info, timeout=4200)
+    log('INFO', 'Final Update UPRank')
 
 
 def refresh_account(token, force):
@@ -468,6 +476,6 @@ if __name__ == '__main__':
         thread_pool.register_async_timer(update_old_luckyrank, 3600, cache)
         thread_pool.register_async_timer(update_luckyrank, 3700, cache)
         thread_pool.register_async_timer(update_statistics, 3800, cache)
-        thread_pool.register_async_timer(api.data.recalculate_pool_up, 3600)
+        thread_pool.register_async_timer(recalculate_pool_up, 3600)
         thread_pool.register_async_timer(update_uprank, 3900, cache)
     app.run(debug=debug, port=port, host=host)

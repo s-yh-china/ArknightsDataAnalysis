@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from operator import is_
 import requests, json, datetime
 from urllib.parse import quote
 from .model import *
 import random
 
+pool_not_up = ['【联合行动】特选干员定向寻访', '常驻标准寻访', '联合行动', '跨年欢庆·相逢', '定制寻访', '未知寻访',
+               '中坚寻访', '中坚甄选', '前路回响']
 
-pool_not_up = ['【联合行动】特选干员定向寻访', '常驻标准寻访', '联合行动', '跨年欢庆·相逢', '定制寻访', '未知寻访', '中坚寻访', '中坚甄选', '前路回响']
+
+def log(log_type: str, info: str):
+    print('[{} {}]: {}'.format(datetime.datetime.now(), log_type, info))
 
 
 def f_hide_mid(info, count=4, fix='*'):
@@ -34,15 +37,15 @@ def f_hide_mid(info, count=4, fix='*'):
                     ret_str = info[:int(str_len / 2 - count / 2)] + count * fix + info[int(str_len / 2 + count / 2):]
                 else:
                     ret_str = info[:int((str_len + 1) / 2 - count / 2)] + count * fix + info[int((
-                                                                                                             str_len + 1) / 2 + count / 2):]
+                                                                                                         str_len + 1) / 2 + count / 2):]
             else:
                 if str_len % 2 == 0:
                     ret_str = info[:int(str_len / 2 - (count - 1) / 2)] + count * fix + info[int(str_len / 2 + (
-                                count + 1) / 2):]
+                            count + 1) / 2):]
                 else:
                     ret_str = info[:int((str_len + 1) / 2 - (count + 1) / 2)] + count * fix + info[
                                                                                               int((str_len + 1) / 2 + (
-                                                                                                          count - 1) / 2):]
+                                                                                                      count - 1) / 2):]
         else:
             ret_str = info[0] + fix * (str_len - 2) + info[-1]
     return ret_str
@@ -445,6 +448,7 @@ def get_pool_statistics(pool_name):
 
 
 def recalculate_pool_up():
+    log('INFO', 'Start Recalculate Pool UP')
     pool_ups = {}
 
     for pool in OSRPool.select():
@@ -457,6 +461,7 @@ def recalculate_pool_up():
             if (operator.name in pool_ups[operator.record.pool]) ^ operator.up:
                 operator.up = not operator.up
                 operator.save()
+    log('INFO', 'Final Recalculate Pool UP')
 
 
 def get_not_up_rank():
@@ -629,7 +634,8 @@ class ada_data:
         nick_name = user_info_source.get('nickName')
         channel_id = str(user_info_source.get('channelMasterId'))
         account = \
-        Account.get_or_create(uid=uid, defaults={'nickname': nick_name, 'token': self.token, 'channel': channel_id})[0]
+            Account.get_or_create(uid=uid,
+                                  defaults={'nickname': nick_name, 'token': self.token, 'channel': channel_id})[0]
 
         need_save = False
         if not account.token == self.token:
@@ -893,7 +899,7 @@ class ada_data:
                 osr_lucky_avg[str(r)] = 0
             else:
                 osr_lucky_avg[str(r)] = (sum(osr_lucky_avg[str(r)])) / (
-                            len(osr_lucky_avg[str(r)]) - osr_lucky_count_pool_num[str(r)])
+                        len(osr_lucky_avg[str(r)]) - osr_lucky_count_pool_num[str(r)])
 
         osr_number_month_sorted = {}
         for item in sorted(osr_number_month.keys(), reverse=True):
