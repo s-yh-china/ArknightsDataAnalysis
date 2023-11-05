@@ -6,7 +6,7 @@
 
 {% block main %}
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">欧非榜 {{ info.pool_name }}</h1>
+        <h1 class="h2">欧非榜 {{ info.pool_name }} 更新时间 {{ info.time.update_time }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group me-2" style="margin: 0 8px;">
                 <a href="{{ url_for('index') }}">

@@ -99,8 +99,9 @@ def get_new_lucky_rank(pool_name):
 
     empty_info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': "None",
-            'end_time': "None"
+            'end_time': "None",
         },
         'lucky': [],
         'unlucky': [],
@@ -171,6 +172,7 @@ def get_new_lucky_rank(pool_name):
 
     info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': str(records[0].time),
             'end_time': str(records[len(records) - 1].time)
         },
@@ -247,6 +249,7 @@ def get_lucky_rank():
 
     info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time).limit(1)[0].time),
             'end_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
         },
@@ -353,6 +356,7 @@ def get_statistics():
 
     info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time).limit(1)[0].time),
             'end_time': str(OperatorSearchRecord.select().order_by(OperatorSearchRecord.time.desc()).limit(1)[0].time)
         },
@@ -432,6 +436,7 @@ def get_pool_statistics(pool_name):
 
     info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': str(
                 OperatorSearchRecord.select().filter(pool=pool).order_by(OperatorSearchRecord.time).limit(1)[0].time),
             'end_time': str(
@@ -470,6 +475,7 @@ def get_not_up_rank():
 
     empty_info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': "None",
             'end_time': "None"
         },
@@ -541,6 +547,7 @@ def get_not_up_rank():
 
     info = {
         'time': {
+            'update_time': datetime.datetime.now().replace(microsecond=0),
             'start_time': str(records[0].time),
             'end_time': str(records[len(records) - 1].time)
         },
