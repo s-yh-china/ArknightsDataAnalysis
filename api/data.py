@@ -262,7 +262,7 @@ def get_lucky_rank():
 def get_statistics():
     statistic_account = []
     for account in Account.select():
-        if UserSettings.get_settings(account.owner).is_statistics:
+        if account.owner and UserSettings.get_settings(account.owner).is_statistics:
             statistic_account.append(account)
 
     diamond_total_info = {

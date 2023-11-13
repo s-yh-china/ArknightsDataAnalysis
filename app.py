@@ -441,11 +441,8 @@ def update_old_luckyrank(flask_cache):
 
 def update_statistics(flask_cache):
     log('INFO', 'Start Update Statistics')
-    try:
-        statistics_info = api.data.get_statistics()
-        flask_cache.set('statistics', statistics_info, timeout=4200)
-    except:
-        traceback.print_exc()
+    statistics_info = api.data.get_statistics()
+    flask_cache.set('statistics', statistics_info, timeout=4200)
     log('INFO', 'Final Update Statistics')
     for pool in api.data.get_all_pool():
         log('INFO', 'Start Update Statistics-{}'.format(pool))
