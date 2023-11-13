@@ -260,13 +260,48 @@ def get_lucky_rank():
 
 
 def get_statistics():
+    statistic_account = []
+    for account in Account.select():
+        if UserSettings.get_settings(account.owner).is_statistics:
+            statistic_account.append(account)
+
+    diamond_total_info = {
+        'now': {
+            'Android': 0,
+            'iOS': 0
+        },
+        'totalget': {
+            'Android': 0,
+            'iOS': 0
+        },
+        'totaluse': {
+            'Android': 0,
+            'iOS': 0
+        },
+        'typeget': {},
+        'typeuse': {},
+    }
+    for account in statistic_account:
+        diamond_records = DiamondRecord.select().where(DiamondRecord.account == account).order_by(
+            DiamondRecord.operate_time.desc())
+        is_ios_now = True
+        is_android_now = True
+        for record in diamond_records:
+            if record.platform == 'iOS' and is_ios_now:
+                is_ios_now = False
+                diamond_total_info['now']['iOS'] += record.after
+            elif record.platform == 'Android' and is_android_now:
+                is_android_now = False
+                diamond_total_info['now']['Android'] += record.after
+            change = record.after - record.before
+            if change > 0:
+                diamond_total_info['totalget'][record.platform] += change
+            else:
+                diamond_total_info['totaluse'][record.platform] -= change
+
     pay_total_money = 0
-    pay_records = PayRecord.select()
+    pay_records = PayRecord.select().where(PayRecord.account.in_(statistic_account))
     for pay_record in pay_records:
-        a_user = pay_record.account.owner
-        if a_user is not None:
-            if not UserSettings.get_settings(a_user).is_statistics:
-                continue
         pay_total_money += pay_record.amount / 100
 
     osr_number = {
@@ -294,7 +329,8 @@ def get_statistics():
     osr_number['常驻标准寻访'] = 0
     osr_pool.append('常驻标准寻访')
 
-    records = OperatorSearchRecord.select().order_by(OperatorSearchRecord.time)
+    records = OperatorSearchRecord.select().where(OperatorSearchRecord.account.in_(statistic_account)).order_by(
+        OperatorSearchRecord.time)
 
     for i in range(len(records) - 1, -1, -1):
         pool = records[i].pool.name
@@ -306,13 +342,6 @@ def get_statistics():
                 osr_six[pool] = 0
 
     for record in records:
-        a_user = record.account.owner
-        if a_user is not None:
-            if not UserSettings.get_settings(a_user).is_statistics:
-                continue
-        else:
-            continue
-
         pool = record.pool.name
         month = record.time.strftime('%Y-%m')
         if month not in osr_number_month:
@@ -365,6 +394,7 @@ def get_statistics():
         'osr_not_up_avg': osr_not_up_avg,
         'pay_total_money': pay_total_money,
         'osr_number_month': osr_number_month_sorted,
+        'diamond_record': diamond_total_info,
         'osr_pool': osr_pool,
     }
     return info
