@@ -1,9 +1,10 @@
 import uuid
 import os.path
-from flask import Flask, redirect, request, url_for, session
+from flask import Flask, redirect, request, url_for
 from flask import render_template, send_from_directory
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from flask_caching import Cache
+from web import disclaimers_blue
 import traceback
 
 import api.data
@@ -21,8 +22,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 hostname = ada_config().config.get('web').get('hostname')
-if hostname == '':
-    hostname = None
+app.register_blueprint(disclaimers_blue)
 
 
 @app.before_request
@@ -30,14 +30,6 @@ def host_check():
     if hostname and request.host != hostname:
         return redirect('http://' + hostname + request.path, code=301)
     return None
-
-
-@app.before_request
-def not_disclaimers():
-    if request.path == '/disclaimers' or request.path == '/logout':
-        return None
-    if session.get('not_disclaimers'):
-        return redirect(url_for('disclaimers'))
 
 
 @login_manager.user_loader
@@ -60,15 +52,13 @@ def register():
                 register_user_info = get_user(username)
                 register_user = User(register_user_info)
                 login_user(register_user)
-                return redirect(url_for('disclaimers'))
+                return redirect(url_for('index'))
             else:
                 emsg = 'Different password.'
         else:
             user = User(user_info)
             if user.verify_password(password1):
                 login_user(user)
-                if not user_info.accept_disclaimers:
-                    return redirect(url_for('disclaimers'))
                 return redirect(url_for('index'))
             emsg = 'Username exists.'
     return render_template('register.html', form=form, emsg=emsg)
@@ -88,8 +78,6 @@ def login():
             user = User(user_info)
             if user.verify_password(password):
                 login_user(user)
-                if not user_info.accept_disclaimers:
-                    return redirect(url_for('disclaimers'))
                 return redirect(request.args.get('next') or url_for('index'))
             else:
                 emsg = 'Wrong username or password.'
@@ -100,8 +88,6 @@ def login():
 @login_required
 def logout():
     logout_user()
-    if session.get('not_disclaimers'):
-        session.pop('not_disclaimers')
     return redirect(url_for('login'))
 
 
@@ -343,23 +329,6 @@ def diamond_record():
 def author_page():
     accs_info = get_user_accs()
     return render_template('author.html', accounts=accs_info, user=current_user)
-
-
-@app.route('/disclaimers', methods=['POST', 'GET'])
-@login_required
-def disclaimers():
-    if request.method == 'POST':
-        if request.form.get('accept'):
-            current_user.accept_disclaimers = True
-            current_user.save()
-            if session.get('not_disclaimers'):
-                session.pop('not_disclaimers')
-            return redirect(url_for('index'))
-
-    if not current_user.accept_disclaimers:
-        session['not_disclaimers'] = True
-
-    return render_template('disclaimers.html', user=current_user)
 
 
 @app.route('/uprank', methods=['GET', 'POST'])
